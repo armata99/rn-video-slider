@@ -1,6 +1,6 @@
 {
   "name": "rn-video-slider",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Dedicated slider for video components in React-Native",
   "main": "src/index.tsx",
   "scripts": {
@@ -14,7 +14,7 @@
     "component"
   ],
   "author": "armata99",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "react": "^18.2.0",
     "react-native": "^0.71.4",
