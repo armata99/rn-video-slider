@@ -2,8 +2,6 @@ name: Publish to npm
 
 on:
   push:
-    branches:
-      - master
     tags:
       - 'v*'  # Push events to matching v*, i.e. v1.0, v20.15.10
 
@@ -12,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Read package.json
-        run: echo "::set-env name=PACKAGE_VERSION::$(node -p "require('./package.json').version")"
+        id: get-version
+        run: echo "::set-output name=PACKAGE_VERSION::$(node -p "require('./package.json').version")"
 
       - name: Generate Release Body
         id: release-body
