@@ -1,15 +1,15 @@
-#rn-video-slider
+# rn-video-slider
 A dedicated progress slider for video players in React-native.
 
 ![Demo](/demo.gif)
 
-##Why this module?
+## Why this module?
 - superior performance thanks to Reanimated library
 - clean and simple implementation that makes it easy to extend
 - integrated buffer indicator for online streams
 - written in Typescript
 
-##Installation
+## Installation
 This module uses `react-native-reanimated` and `react-native-gesture-handler` as 
 peer dependencies. make sure You have installed them correctly. You may also install
 `react-native-video`. Check out these links to proceed their installation process:
@@ -18,18 +18,18 @@ peer dependencies. make sure You have installed them correctly. You may also ins
 - [video installation](https://react-native-video.github.io/react-native-video/installation)
 
 Once you are done with above, add the main package with one of below commands: 
-###using npm
+### using npm
 ```sh
 npm install rn-video-slider
 ```
 
-###using yarn
+### using yarn
 ```sh
 yarn add rn-video-slider
 ```
 That will be it.
 
-##Usage
+## Usage
 ```typescript jsx
 import Slider, {ISlider} from "rn-video-slider";
 
@@ -53,7 +53,7 @@ const ControlSet=()=>{
 }
 ```
 
-##Properties
+## Properties
 Here is the list of properties that you can set or override.
 
 |        Name         |      Type       | Required |     Default Value     | Description                                                                                            |
@@ -70,7 +70,7 @@ Here is the list of properties that you can set or override.
 |    onSlideStart     |   () => void    |    No    |       undefined       | called when thumb is being touched and held                                                            |
 |     onSlideStop     |   () => void    |    No    |       undefined       | called when thumb is released                                                                          |
 
-##Methods
+## Methods
 Here is the list of methods that can be called via reference
 
 |       Name        | Action                                             |   Params   |
@@ -81,25 +81,25 @@ Here is the list of methods that can be called via reference
 
 **Note:** progress values are a float from 0 to 1
 
-##TODO
+## TODO
 - [ ] add style prop for root view
 - [ ] fix delay between thumb and track while sliding fast
 - [ ] implement tap to seek feature
 - [ ] write a better example
 - [ ] replace the deprecated `useAnimatedGestureHandler` with newer API
 
-##Contributions
+## Contributions
 If you have any idea to improve or fix something, open an issue and state
 it in details. You will always be welcomed.
 
-##Compatability
+## Compatability
 - `react-native-reanimated`: `2.x`, `3.x`
 - `react-native-gesture-handler`: `2.x`
 
-##Acknowledgement
+## Acknowledgement
 The idea behind this is from `react-native-reanimated-slider`.
 Since the mentioned module is written with Reanimated v1 API, and hasn't
 updated for a long period, I decided to remake it.
 
-##License
+## License
 [MIT License](https://opensource.org/licenses/MIT)
