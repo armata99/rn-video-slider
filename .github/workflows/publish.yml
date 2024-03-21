@@ -1,0 +1,50 @@
+name: Publish to npm
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*'  # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read package.json
+        run: echo "::set-env name=PACKAGE_VERSION::$(node -p "require('./package.json').version")"
+
+      - name: Generate Release Body
+        id: release-body
+        run: |
+          release_body=$(node gen-release-notes.js)
+          echo "::set-output name=RELEASE_BODY::$release_body"
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          tag_name: v${{ env.PACKAGE_VERSION }}
+          release_name: Release ${{ env.PACKAGE_VERSION }}
+          body: ${{ steps.release-body.outputs.RELEASE_BODY }}
+          draft: false
+          prerelease: false
+
+  publish:
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}  # You need to create this secret in your repository settings
