@@ -2,7 +2,7 @@
   "name": "rn-video-slider",
   "version": "0.1.0",
   "description": "A dedicated progress slider for video players in React-native.",
-  "main": "src/index.ts",
+  "main": "src/index.tsx",
   "directories": {
     "example": "example"
   },
