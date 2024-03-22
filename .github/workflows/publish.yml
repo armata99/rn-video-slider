@@ -9,24 +9,32 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
-      - name: Read package.json
-        id: get-version
-        run: echo "::set-output name=PACKAGE_VERSION::$(node -p "require('./package.json').version")"
 
-      - name: Generate Release Body
-        id: release-body
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get Latest Tag
+        id: get_tag
         run: |
-          release_body=$(node gen-release-notes.js)
-          echo "::set-output name=RELEASE_BODY::$release_body"
+          latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1) --abbrev=0)
+          echo "Latest tag is $latest_tag"
+          echo "::set-output name=latest_tag::$latest_tag"
+
+      - name: Change script permissions
+        run: chmod +x ./note-make.sh
+
+      - name: Generate Release notes
+        id: release-notes
+        run: ./note-make.sh
 
       - name: Create Release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          tag_name: v${{ env.PACKAGE_VERSION }}
-          release_name: Release ${{ env.PACKAGE_VERSION }}
-          body: ${{ steps.release-body.outputs.RELEASE_BODY }}
+          tag_name: ${{ steps.get_tag.outputs.latest_tag }}
+          release_name: ${{ steps.get_tag.outputs.latest_tag }}
+          body: ${{ steps.release-notes.outputs.CHANGE_LIST }}
           draft: false
           prerelease: false
 
@@ -40,7 +48,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 12
+          node-version: 14
           registry-url: https://registry.npmjs.org
 
       - name: Publish to npm

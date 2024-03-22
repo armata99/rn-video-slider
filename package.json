@@ -24,9 +24,6 @@
   ],
   "author": "armata99",
   "license": "MIT",
-  "dependencies": {
-    "markdown-it": "^14.1.0"
-  },
   "peerDependencies": {
     "react-native-gesture-handler": "^2.x.x",
     "react-native-reanimated": "^2.x.x"
