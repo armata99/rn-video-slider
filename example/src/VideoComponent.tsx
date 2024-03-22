@@ -1,10 +1,8 @@
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {Dimensions, StyleSheet, View} from "react-native";
 import Video, {OnLoadData, OnProgressData} from 'react-native-video'
-import Slider from "rn-video-slider";
+import Slider, {ISlider} from 'rn-video-slider';
 import ControlButton from "./ControlButton";
-import {useState} from "react";
-import {ISlider} from "../../src";
 
 const styles = StyleSheet.create({
     container: {flex: 1, backgroundColor: 'black', alignItems: 'center', justifyContent: 'center'},
@@ -20,7 +18,7 @@ const styles = StyleSheet.create({
 
 const VideoComponent = () => {
     const videoLength = useRef(0);
-    const [paused, setPaused] = useState(false);
+    const [paused, setPaused] = useState(true);
     const _sliderRef = React.createRef<ISlider>();
     const _playerRef = React.createRef<Video>();
 
@@ -33,8 +31,7 @@ const VideoComponent = () => {
     };
 
     const onProgress = ({currentTime, playableDuration, seekableDuration}: OnProgressData) => {
-        console.log(currentTime);
-        _sliderRef.current?.setProgressWithSpring(currentTime / seekableDuration);
+        _sliderRef.current?.setProgress(currentTime / seekableDuration);
         _sliderRef.current?.setBufferProgress(playableDuration / seekableDuration);
     };
 
@@ -42,15 +39,22 @@ const VideoComponent = () => {
         setPaused(!paused);
     }
 
+    const onEnd=()=>{
+        _sliderRef.current?.setColdProgress(0);
+        _playerRef.current?.seek(0);
+    }
+
     return (
         <View style={styles.container}>
             <Video
                 ref={_playerRef}
                 onProgress={onProgress}
-                paused={paused} style={styles.videoView}
+                paused={paused}
+                style={styles.videoView}
                 resizeMode={'contain'}
                 source={{uri: 'https://www.w3schools.com/tags/mov_bbb.mp4'}}
                 onLoad={onLoad}
+                onEnd={onEnd}
             />
             <View style={styles.controlSet}>
                 <ControlButton
@@ -63,7 +67,7 @@ const VideoComponent = () => {
                 <View style={{position: 'absolute', bottom: 50, alignSelf: 'center'}}>
                     <Slider
                         ref={_sliderRef}
-                        width={Dimensions.get('window').width - 100}
+                        width={Dimensions.get('window').width - 50}
                         onSlide={_onSlide}
                     />
                 </View>

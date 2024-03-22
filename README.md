@@ -87,6 +87,7 @@ Here is the list of methods that can be called via reference
 - [ ] implement tap to seek feature
 - [ ] write a better example
 - [ ] replace the deprecated `useAnimatedGestureHandler` with newer API
+- [ ] write necessary tests
 
 ## Contributions
 If you have any idea to improve or fix something, open an issue and state
@@ -99,7 +100,7 @@ it in details. You will always be welcomed.
 ## Acknowledgement
 The idea behind this is from `react-native-reanimated-slider`.
 Since the mentioned module is written with Reanimated v1 API, and hasn't
-updated for a long period, I decided to remake it.
+been updated for a long period, I decided to remake it.
 
 ## License
 [MIT License](https://opensource.org/licenses/MIT)

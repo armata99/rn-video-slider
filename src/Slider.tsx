@@ -1,4 +1,6 @@
 import React, {ForwardedRef, forwardRef, useImperativeHandle} from 'react';
+import {I18nManager, Platform, StyleSheet, ViewStyle} from 'react-native';
+import {PanGestureHandler, GestureHandlerRootView} from 'react-native-gesture-handler';
 import Animated, {
     runOnJS,
     SharedValue,
@@ -9,40 +11,8 @@ import Animated, {
     withSpring,
     withTiming,
 } from 'react-native-reanimated';
-import {PanGestureHandler, GestureHandlerRootView} from 'react-native-gesture-handler';
-import {I18nManager, Platform, StyleSheet, ViewStyle} from 'react-native';
-
-const THUMB_HIT_SLOP = {top: 15, bottom: 15, left: 15, right: 15};
-
-export const DEFAULT_SLIDER_SPRING_CONFIG: object = {
-    damping: 250,
-    mass: 1,
-    stiffness: 50,
-    overshootClamping: false,
-    restSpeedThreshold: 0.001,
-    restDisplacementThreshold: 0.001,
-};
-
-export interface ISlider {
-    setProgress: (progress: number) => void;
-    setProgressWithSpring: (progress: number) => void;
-    setBufferProgress: (progress: number) => void;
-}
-
-interface ISliderProps {
-    width: number;
-    height?: number;
-    thumbSize?: number;
-    onSlideStart?: () => void;
-    onSlide?: (value: number) => void;
-    onSlideFinish?: (progress: number) => void;
-    thumbColor?: string;
-    progressColor?: string;
-    bufferProgressColor?: string;
-    trackColor?: string;
-    isRTL?: boolean;
-    compensateForceRTL?: boolean;
-}
+import {ISlider, ISliderProps} from './types';
+import {DEFAULT_SLIDER_SPRING_CONFIG, THUMB_HIT_SLOP} from "./configs";
 
 const styles = StyleSheet.create({
     root: {padding: 10},
@@ -88,8 +58,8 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
     const compensateForceRTL = Platform.OS === 'android' ? _compForceRTL : false;
 
     useImperativeHandle(ref, () => ({
-        setProgress: p => (progress.value = p),
-        setProgressWithSpring: p => (progress.value = withSpring(p, DEFAULT_SLIDER_SPRING_CONFIG)),
+        setProgress: p => (progress.value = withSpring(p, DEFAULT_SLIDER_SPRING_CONFIG)),
+        setColdProgress: p => (progress.value = p),
         setBufferProgress: p => (bufferProgress.value = p),
     }));
 
