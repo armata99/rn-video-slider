@@ -37,13 +37,13 @@ generate_output() {
 # Get the latest tag
 latest_tag=$(git describe --tags --abbrev=0)
 
-# Get the oldest tag or if there's only one tag, set oldest_tag to latest_tag
-oldest_tag=$(git describe --abbrev=0 $(git describe --abbrev=0)^)
+# Get the oldest tag or if there's only one tag, set prev_tag to latest_tag
+prev_tag=$(git tag | sort -V | tail -n 2 | head -n 1)
 
-if [ -n "${latest_tag}" ] && [ -n "${oldest_tag}" ]; then
-    # Both latest_tag and oldest_tag exist
-    commit_messages=$(get_commit_messages "${latest_tag}" "${oldest_tag}")
-    pull_request_messages=$(get_merged_pull_requests "${latest_tag}" "${oldest_tag}")
+if [ -n "${latest_tag}" ] && [ -n "${prev_tag}" ]; then
+    # Both latest_tag and prev_tag exist
+    commit_messages=$(get_commit_messages "${latest_tag}" "${prev_tag}")
+    pull_request_messages=$(get_merged_pull_requests "${latest_tag}" "${prev_tag}")
     generate_output "${commit_messages}" "${pull_request_messages}"
 else
     empty_message="## There is no tag range to check the changes!"
