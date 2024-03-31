@@ -67,18 +67,28 @@ Here is the list of properties that you can set or override.
 |     trackColor      |     string      |    No    | rgba(255,255,255,0.2) | color of underlying view                                                                               |
 |      rootStyle      |    ViewStyle    |    No    |       undefined       | style addon for root view                                                                              |
 |        isRTL        |     boolean     |    No    |   I18nManager.isRTL   | overrides direction of movement. setting to "true" makes the slider go from right to left.             |
-|       onSlide       | (value) => void |    No    |       undefined       | called when slider is being moved by swiping it manually. "value" is a number that changes from 0 to 1 |
-|    onSlideStart     |   () => void    |    No    |       undefined       | called when thumb is being touched and held                                                            |
-|     onSlideStop     |   () => void    |    No    |       undefined       | called when thumb is released                                                                          |
+
+**Note:** Root view has a default padding equal to 10.
+Override it in root style if you need to.
+
+## Callbacks properties
+Here is the list of callbacks to use.
+
+|     Name     |  Params   | Description                                                                                                 |
+|:------------:|:---------:|-------------------------------------------------------------------------------------------------------------|
+|   onSlide    |   value   | Called when the slider is being moved by swiping it manually. "value" is a number that changes from 0 to 1. |
+| onSlideStart | undefined | Called when the thumb is being touched and held.                                                            |
+| onSlideStop  | undefined | Called when the thumb is released.                                                                          |
+
 
 ## Methods
-Here is the list of methods that can be called via reference
+Here is the list of methods that can be called via reference.
 
-|       Name        | Action                                             |   Params   |
-|:-----------------:|----------------------------------------------------|:----------:|
-|    setProgress    | Animates main progress slider based on given value |  progress  |
-|  setColdProgress  | Sets main progress level without any animation.    |  progress  |
-| setBufferProgress | Sets progress level of the buffer indicator.       |  progress  |
+|       Name        |  Params  | Description                                        |
+|:-----------------:|:--------:|----------------------------------------------------|
+|    setProgress    | progress | Animates main progress slider based on given value |
+|  setColdProgress  | progress | Sets main progress level without any animation     |
+| setBufferProgress | progress | Sets progress level of the buffer indicator        |
 
 **Note:** progress values are a float from 0 to 1
 
