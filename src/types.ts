@@ -1,3 +1,5 @@
+import {ViewStyle} from "react-native";
+
 export interface ISlider {
     setProgress: (progress: number) => void;
     setColdProgress: (progress: number) => void;
@@ -17,4 +19,5 @@ export interface ISliderProps {
     trackColor?: string;
     isRTL?: boolean;
     compensateForceRTL?: boolean;
+    rootStyle?: ViewStyle;
 }

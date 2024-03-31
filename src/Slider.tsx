@@ -47,6 +47,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
         onSlide,
         isRTL = I18nManager.isRTL,
         compensateForceRTL: _compForceRTL = false,
+        rootStyle,
     } = props;
 
     const progress = useSharedValue(0);
@@ -167,7 +168,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
     ];
 
     return (
-        <GestureHandlerRootView style={styles.root}>
+        <GestureHandlerRootView style={[styles.root, rootStyle]}>
             <Animated.View style={trackStyle}>
                 <Animated.View style={progressStyle} />
                 <Animated.View style={bufferStyle} />

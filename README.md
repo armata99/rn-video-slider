@@ -65,6 +65,7 @@ Here is the list of properties that you can set or override.
 |    progressColor    |     string      |    No    |        #FFFFFF        | color of progress indicator                                                                            |
 | bufferProgressColor |     string      |    No    | rgba(255,255,255,0.5) | color of buffer progress indicator                                                                     |
 |     trackColor      |     string      |    No    | rgba(255,255,255,0.2) | color of underlying view                                                                               |
+|      rootStyle      |    ViewStyle    |    No    |       undefined       | style addon for root view                                                                              |
 |        isRTL        |     boolean     |    No    |   I18nManager.isRTL   | overrides direction of movement. setting to "true" makes the slider go from right to left.             |
 |       onSlide       | (value) => void |    No    |       undefined       | called when slider is being moved by swiping it manually. "value" is a number that changes from 0 to 1 |
 |    onSlideStart     |   () => void    |    No    |       undefined       | called when thumb is being touched and held                                                            |
@@ -82,7 +83,7 @@ Here is the list of methods that can be called via reference
 **Note:** progress values are a float from 0 to 1
 
 ## TODO
-- [ ] add style prop for root view
+- [x] ~~add style prop for root view~~
 - [ ] fix delay between thumb and track while sliding fast
 - [ ] implement tap to seek feature
 - [ ] write a better example
