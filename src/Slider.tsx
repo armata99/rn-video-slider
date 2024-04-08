@@ -1,10 +1,9 @@
 import React, {ForwardedRef, forwardRef, useImperativeHandle} from 'react';
-import {I18nManager, Platform, StyleSheet, ViewStyle} from 'react-native';
-import {PanGestureHandler, GestureHandlerRootView} from 'react-native-gesture-handler';
+import {I18nManager, Platform, StyleSheet, View, ViewStyle} from 'react-native';
+import {GestureDetector, Gesture} from 'react-native-gesture-handler';
 import Animated, {
     runOnJS,
     SharedValue,
-    useAnimatedGestureHandler,
     useAnimatedStyle,
     useDerivedValue,
     useSharedValue,
@@ -48,15 +47,18 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
         isRTL = I18nManager.isRTL,
         compensateForceRTL: _compForceRTL = false,
         rootStyle,
+        tapActive = true,
     } = props;
 
-    const progress = useSharedValue(0);
-    const bufferProgress = useSharedValue(0);
-    const offsetOverflow = thumbSize / 2;
-    const maxDrag = width;
-    const minDrag = -offsetOverflow;
-
-    const compensateForceRTL = Platform.OS === 'android' ? _compForceRTL : false;
+    //calculated values
+    const progress = useSharedValue<number>(0);
+    const bufferProgress = useSharedValue<number>(0);
+    const offsetOverflow: number = thumbSize / 2;
+    const maxDrag: number = width;
+    const minDrag: number = -offsetOverflow;
+    const actualWidth = (isRTL ? -width : width);
+    const startX = useSharedValue<number>(0); //to memorize the start point
+    const compensateForceRTL: boolean = Platform.OS === 'android' ? _compForceRTL : false;
 
     useImperativeHandle(ref, () => ({
         setProgress: p => (progress.value = withSpring(p, DEFAULT_SLIDER_SPRING_CONFIG)),
@@ -64,23 +66,32 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
         setBufferProgress: p => (bufferProgress.value = p),
     }));
 
-    const _onEndHandler = () => {
-        onSlideFinish?.(progress.value);
-    };
-
-    const _onGestureEvent = useAnimatedGestureHandler({
-        onStart: (event, ctx: {startX: number}) => {
-            ctx.startX = progress.value * (isRTL ? -width : width);
-        },
-        onActive: (event: {translationX: number}, ctx) => {
-            const nextValue = ctx.startX + event.translationX;
-            const clampedValue = Math.max(0, Math.min(nextValue / (isRTL ? -width : width), 1));
+    const pan = Gesture.Pan()
+        .onBegin(() => {
+            onSlideStart?.(progress.value);
+            startX.value = progress.value * actualWidth;
+        }).onUpdate((event) => {
+            const nextValue = startX.value + event.translationX;
+            const clampedValue = Math.max(0, Math.min(nextValue / actualWidth, 1));
             progress.value = clampedValue;
             if (onSlide) {
                 runOnJS(onSlide)(clampedValue);
             }
-        },
-    });
+        })
+        .onFinalize(() => {
+            onSlideFinish?.(progress.value);
+        });
+
+    const tap = Gesture.Tap()
+        .maxDuration(150)
+        .onTouchesUp((event) => {
+            const nextX = event.allTouches[0].x - thumbSize;
+            const clampedValue = Math.max(0, Math.min(nextX / actualWidth, 1));
+            progress.value = clampedValue;
+            if (onSlide && tapActive) {
+                runOnJS(onSlide)(clampedValue);
+            }
+        });
 
     const thumbOffset = useDerivedValue(() => {
         const nextValue = progress.value * width - offsetOverflow;
@@ -168,15 +179,17 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
     ];
 
     return (
-        <GestureHandlerRootView style={[styles.root, rootStyle]}>
-            <Animated.View style={trackStyle}>
-                <Animated.View style={progressStyle} />
-                <Animated.View style={bufferStyle} />
-                <PanGestureHandler onGestureEvent={_onGestureEvent} onActivated={onSlideStart} onEnded={_onEndHandler} minDist={0}>
-                    <Animated.View hitSlop={THUMB_HIT_SLOP} style={thumbStyle} />
-                </PanGestureHandler>
-            </Animated.View>
-        </GestureHandlerRootView>
+        <GestureDetector gesture={tap}>
+            <View style={[styles.root, rootStyle]}>
+                <View style={trackStyle}>
+                    <Animated.View style={progressStyle} />
+                    <Animated.View style={bufferStyle} />
+                    <GestureDetector gesture={pan}>
+                        <Animated.View hitSlop={THUMB_HIT_SLOP} style={thumbStyle}/>
+                    </GestureDetector>
+                </View>
+            </View>
+        </GestureDetector>
     );
 };
 

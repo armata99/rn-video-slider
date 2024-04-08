@@ -56,17 +56,18 @@ const ControlSet=()=>{
 ## Properties
 Here is the list of properties that you can set or override.
 
-|        Name         |      Type       | Required |     Default Value     | Description                                                                                            |
-|:-------------------:|:---------------:|:--------:|:---------------------:|--------------------------------------------------------------------------------------------------------|
-|        width        |     number      |   Yes    |       undefined       | width of slider track                                                                                  |
-|       height        |     number      |    No    |           3           | height of slider track                                                                                 |
-|      thumbSize      |     number      |    No    |          12           | diameter of sliding thumb                                                                              |
-|     thumbColor      |     string      |    No    |        #FFFFFF        | color of sliding thumb                                                                                 |
-|    progressColor    |     string      |    No    |        #FFFFFF        | color of progress indicator                                                                            |
-| bufferProgressColor |     string      |    No    | rgba(255,255,255,0.5) | color of buffer progress indicator                                                                     |
-|     trackColor      |     string      |    No    | rgba(255,255,255,0.2) | color of underlying view                                                                               |
-|      rootStyle      |    ViewStyle    |    No    |       undefined       | style addon for root view                                                                              |
-|        isRTL        |     boolean     |    No    |   I18nManager.isRTL   | overrides direction of movement. setting to "true" makes the slider go from right to left.             |
+|        Name         |      Type       | Required |     Default Value     | Description                                                                                 |
+|:-------------------:|:---------------:|:--------:|:---------------------:|---------------------------------------------------------------------------------------------|
+|        width        |     number      |   Yes    |       undefined       | width of slider track                                                                       |
+|       height        |     number      |    No    |           3           | height of slider track                                                                      |
+|      thumbSize      |     number      |    No    |          12           | diameter of sliding thumb                                                                   |
+|     thumbColor      |     string      |    No    |        #FFFFFF        | color of sliding thumb                                                                      |
+|    progressColor    |     string      |    No    |        #FFFFFF        | color of progress indicator                                                                 |
+| bufferProgressColor |     string      |    No    | rgba(255,255,255,0.5) | color of buffer progress indicator                                                          |
+|     trackColor      |     string      |    No    | rgba(255,255,255,0.2) | color of underlying view                                                                    |
+|      rootStyle      |    ViewStyle    |    No    |       undefined       | style addon for root view                                                                   |
+|        isRTL        |     boolean     |    No    |   I18nManager.isRTL   | overrides direction of movement. setting to "true" makes the slider go from right to left.  |
+|      tapActive      |     boolean     |    No    |         true          | activates tap gesture. when set to "true", onSlide function fires on receiving single taps. |
 
 **Note:** Root view has a default padding equal to 10.
 Override it in root style if you need to.
@@ -74,31 +75,32 @@ Override it in root style if you need to.
 ## Callbacks properties
 Here is the list of callbacks to use.
 
-|     Name     |  Params   | Description                                                                                                 |
-|:------------:|:---------:|-------------------------------------------------------------------------------------------------------------|
-|   onSlide    |   value   | Called when the slider is being moved by swiping it manually. "value" is a number that changes from 0 to 1. |
-| onSlideStart | undefined | Called when the thumb is being touched and held.                                                            |
-| onSlideStop  | undefined | Called when the thumb is released.                                                                          |
+|     Name     | Params | Description                                                                                                                   |
+|:------------:|:------:|-------------------------------------------------------------------------------------------------------------------------------|
+|   onSlide    | value  | Called when the slider is being moved by swiping it manually. It passes a "value" which is a number that changes from 0 to 1. |
+| onSlideStart | value  | Called when the thumb is being touched and held. It passes the current progress as "value".                                   |
+| onSlideStop  | value  | Called when the thumb is released. It passes the current progress as "value".                                                 |
 
 
 ## Methods
 Here is the list of methods that can be called via reference.
 
-|       Name        |  Params  | Description                                        |
-|:-----------------:|:--------:|----------------------------------------------------|
-|    setProgress    | progress | Animates main progress slider based on given value |
-|  setColdProgress  | progress | Sets main progress level without any animation     |
-| setBufferProgress | progress | Sets progress level of the buffer indicator        |
+|       Name        | Params | Description                                        |
+|:-----------------:|:------:|----------------------------------------------------|
+|    setProgress    | value  | Animates main progress slider based on given value |
+|  setColdProgress  | value  | Sets main progress level without any animation     |
+| setBufferProgress | value  | Sets progress level of the buffer indicator        |
 
 **Note:** progress values are a float from 0 to 1
 
 ## TODO
-- [x] ~~add style prop for root view~~
 - [ ] fix delay between thumb and track while sliding fast
-- [ ] implement tap to seek feature
-- [ ] write a better example
-- [ ] replace the deprecated `useAnimatedGestureHandler` with newer API
 - [ ] write necessary tests
+- [ ] write a better example
+- [x] ~~implement tap to seek feature~~
+- [x] ~~replace the deprecated `useAnimatedGestureHandler` with newer API~~
+- [x] ~~add style prop for root view~~
+
 
 ## Contributions
 If you have any idea to improve or fix something, open an issue and state

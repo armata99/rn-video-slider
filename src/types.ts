@@ -1,18 +1,18 @@
 import {ViewStyle} from "react-native";
 
 export interface ISlider {
-    setProgress: (progress: number) => void;
-    setColdProgress: (progress: number) => void;
-    setBufferProgress: (progress: number) => void;
+    setProgress: (value: number) => void;
+    setColdProgress: (value: number) => void;
+    setBufferProgress: (value: number) => void;
 }
 
 export interface ISliderProps {
     width: number;
     height?: number;
     thumbSize?: number;
-    onSlideStart?: () => void;
+    onSlideStart?: (value: number) => void;
     onSlide?: (value: number) => void;
-    onSlideFinish?: (progress: number) => void;
+    onSlideFinish?: (value: number) => void;
     thumbColor?: string;
     progressColor?: string;
     bufferProgressColor?: string;
@@ -20,4 +20,5 @@ export interface ISliderProps {
     isRTL?: boolean;
     compensateForceRTL?: boolean;
     rootStyle?: ViewStyle;
+    tapActive?: boolean;
 }
