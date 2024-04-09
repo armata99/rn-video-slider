@@ -13,7 +13,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         alignItems: 'center',
         justifyContent: 'center',
-    }
+    },
+    sliderWrapper: {position: 'absolute', bottom: 50, alignSelf: 'center'},
 })
 
 const VideoComponent = () => {
@@ -29,6 +30,10 @@ const VideoComponent = () => {
     const _onSlide = (value: number) => {
         _playerRef.current?.seek(value * videoLength.current);
     };
+
+    const _onSlideStart = () => setPaused(true);
+
+    const _onSlideFinish = () => setPaused(false);
 
     const onProgress = ({currentTime, playableDuration, seekableDuration}: OnProgressData) => {
         _sliderRef.current?.setProgress(currentTime / seekableDuration);
@@ -64,11 +69,13 @@ const VideoComponent = () => {
                         require('./images/pause_icon.png')}
                     onPress={_onPlayPausePress}
                 />
-                <View style={{position: 'absolute', bottom: 50, alignSelf: 'center'}}>
+                <View style={styles.sliderWrapper}>
                     <Slider
                         ref={_sliderRef}
                         width={Dimensions.get('window').width - 50}
                         onSlide={_onSlide}
+                        onSlideStart={_onSlideStart}
+                        onSlideFinish={_onSlideFinish}
                     />
                 </View>
             </View>

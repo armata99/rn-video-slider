@@ -7,7 +7,8 @@ A dedicated progress slider for video players in React-native.
 - superior performance thanks to Reanimated library
 - clean and simple implementation that makes it easy to extend
 - integrated buffer indicator for online streams
-- written in Typescript
+- fully written in Typescript
+- easiest way to use
 
 ## Installation
 This module uses `react-native-reanimated` and `react-native-gesture-handler` as 

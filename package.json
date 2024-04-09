@@ -19,14 +19,16 @@
     "video",
     "slider",
     "seekbar",
+    "seeker",
     "component",
-    "progress"
+    "progress",
+    "progressbar"
   ],
   "author": "armata99",
   "license": "MIT",
   "peerDependencies": {
     "react-native-gesture-handler": "^2.x.x",
-    "react-native-reanimated": "^2.x.x"
+    "react-native-reanimated": "^3.x.x"
   },
   "devDependencies": {
     "@tsconfig/react-native": "^3.0.2",
