@@ -68,7 +68,9 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
 
     const pan = Gesture.Pan()
         .onBegin(() => {
-            onSlideStart?.(progress.value);
+            if (onSlideStart){
+                runOnJS(onSlideStart)(progress.value)
+            }
             startX.value = progress.value * actualWidth;
         }).onUpdate((event) => {
             const nextValue = startX.value + event.translationX;
@@ -79,7 +81,9 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
             }
         })
         .onFinalize(() => {
-            onSlideFinish?.(progress.value);
+            if (onSlideFinish){
+                runOnJS(onSlideFinish)(progress.value)
+            }
         });
 
     const tap = Gesture.Tap()
