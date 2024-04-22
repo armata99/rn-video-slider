@@ -113,6 +113,21 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
     }
   });
 
+  const progressWidth = useDerivedValue(() => {
+    const nextValue = progress.value * width + offsetOverflow;
+    if (nextValue >= 0 && nextValue <= width) {
+      return nextValue;
+    } else {
+      if (nextValue > width) {
+        progress.value = 1;
+        return width;
+      } else {
+        progress.value = 0;
+        return 0;
+      }
+    }
+  });
+
   const bufferWidth: SharedValue<number> = useDerivedValue(() => {
     const nextValue = bufferProgress.value * width;
     if (nextValue >= 0 && nextValue <= width) {
@@ -129,9 +144,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
   });
 
   const progressAnimatedStyle = useAnimatedStyle((): ViewStyle => {
-    return {
-      width: withSpring(thumbOffset.value + offsetOverflow, {stiffness: 1000, damping: 1000}),
-    };
+    return {width: progressWidth.value};
   });
 
   const bufferAnimatedStyle = useAnimatedStyle((): ViewStyle => {

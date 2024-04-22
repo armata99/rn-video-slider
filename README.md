@@ -31,26 +31,31 @@ yarn add rn-video-slider
 That will be it.
 
 ## Usage
+
 ```typescript jsx
+import {Dimensions} from "react-native";
 import Slider, {ISlider} from "rn-video-slider";
 
-const ControlSet=()=>{
+const ControlSet = () => {
 
-    const sliderRef = React.createRef<ISlider>();
-    //call below function in video progress callback
-    //sliderRef.current?.setProgress(0.5);
-    
-    const _onSlide = (value: number) => {
-        //seek your video with value
-    };
-    
-    return (
-        <Slider
-            ref={sliderRef}
-            width={400}
-            onSlide={_onSlide}
-        />
-    )
+  const sliderRef = React.createRef<ISlider>();
+  //call below function in video progress callback
+  //sliderRef.current?.setProgress(0.5);
+
+  const _onSlide = (value: number) => {
+    //seek your video with value
+  };
+  
+  //this simpy means 80% of screen's width
+  const sliderWdith = Dimensions.get('window').width * 0.8;
+
+  return (
+    <Slider
+      ref={sliderRef}
+      width={sliderWdith}
+      onSlide={_onSlide}
+    />
+  )
 }
 ```
 
@@ -95,9 +100,11 @@ Here is the list of methods that can be called via reference.
 **Note:** progress values are a float from 0 to 1
 
 ## TODO
-- [ ] fix delay between thumb and track while sliding fast
 - [ ] write necessary tests
 - [ ] write a better example
+- [ ] add expansion feature
+- [ ] more and better demo gifs
+- [x] ~~fix delay between thumb and track while sliding fast~~
 - [x] ~~implement tap to seek feature~~
 - [x] ~~replace the deprecated `useAnimatedGestureHandler` with newer API~~
 - [x] ~~add style prop for root view~~
