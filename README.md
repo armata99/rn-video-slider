@@ -1,7 +1,7 @@
 # rn-video-slider
 A dedicated progress slider for video players in React-native.
 
-![Demo](/demo.gif)
+<img src="https://github.com/armata99/assets/blob/master/rn-video-slider/main.gif" alt="Demonstration">
 
 ## Why this module?
 - superior performance thanks to Reanimated library
@@ -9,6 +9,7 @@ A dedicated progress slider for video players in React-native.
 - integrated buffer indicator for online streams
 - fully written in Typescript
 - easiest way to use
+- RTL support
 
 ## Installation
 This module uses `react-native-reanimated` and `react-native-gesture-handler` as 
