@@ -22,7 +22,7 @@ peer dependencies. make sure You have installed them correctly. You may also ins
 Once you are done with above, add the main package with one of below commands: 
 ### using npm
 ```sh
-npm install rn-video-slider
+npm i rn-video-slider
 ```
 
 ### using yarn
