@@ -56,7 +56,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
   const offsetOverflow: number = thumbSize / 2;
   const maxDrag: number = width;
   const minDrag: number = -offsetOverflow;
-  const actualWidth = isRTL ? -width : width;
+  const xRange = isRTL ? -width : width;
   const startX = useSharedValue<number>(0); //to memorize the start point
   const compensateForceRTL: boolean = Platform.OS === 'android' ? _compForceRTL : false;
 
@@ -71,11 +71,11 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
       if (onSlideStart) {
         runOnJS(onSlideStart)(progress.value);
       }
-      startX.value = progress.value * actualWidth;
+      startX.value = progress.value * xRange;
     })
     .onUpdate(event => {
       const nextValue = startX.value + event.translationX;
-      const clampedValue = Math.max(0, Math.min(nextValue / actualWidth, 1));
+      const clampedValue = Math.max(0, Math.min(nextValue / xRange, 1));
       progress.value = clampedValue;
       if (onSlide) {
         runOnJS(onSlide)(clampedValue);
@@ -90,8 +90,10 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
   const tap = Gesture.Tap()
     .maxDuration(150)
     .onTouchesUp(event => {
-      const nextX = event.allTouches[0].x - thumbSize;
-      const clampedValue = Math.max(0, Math.min(nextX / actualWidth, 1));
+      const targetX = event.allTouches[0].x - Math.max(12, offsetOverflow);
+      //we need complement of x on rtl
+      const progressVal = isRTL ? 1 - Math.abs(targetX / xRange) : targetX / xRange;
+      const clampedValue = Math.max(0, Math.min(progressVal, 1));
       progress.value = clampedValue;
       if (onSlide && tapActive) {
         runOnJS(onSlide)(clampedValue);
