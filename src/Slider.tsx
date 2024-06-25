@@ -116,7 +116,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
   });
 
   const progressWidth = useDerivedValue(() => {
-    const nextValue = progress.value * width + offsetOverflow;
+    const nextValue = progress.value * width;
     if (nextValue >= 0 && nextValue <= width) {
       return nextValue;
     } else {
