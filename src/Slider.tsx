@@ -66,40 +66,6 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
     setBufferProgress: p => (bufferProgress.value = p),
   }));
 
-  const pan = Gesture.Pan()
-    .onBegin(() => {
-      if (onSlideStart) {
-        runOnJS(onSlideStart)(progress.value);
-      }
-      startX.value = progress.value * xRange;
-    })
-    .onUpdate(event => {
-      const nextValue = startX.value + event.translationX;
-      const clampedValue = Math.max(0, Math.min(nextValue / xRange, 1));
-      progress.value = clampedValue;
-      if (onSlide) {
-        runOnJS(onSlide)(clampedValue);
-      }
-    })
-    .onFinalize(() => {
-      if (onSlideFinish) {
-        runOnJS(onSlideFinish)(progress.value);
-      }
-    });
-
-  const tap = Gesture.Tap()
-    .maxDuration(150)
-    .onTouchesUp(event => {
-      const targetX = event.allTouches[0].x - Math.max(12, offsetOverflow);
-      //we need complement of x on rtl
-      const progressVal = isRTL ? 1 - Math.abs(targetX / xRange) : targetX / xRange;
-      const clampedValue = Math.max(0, Math.min(progressVal, 1));
-      progress.value = clampedValue;
-      if (onSlide && tapActive) {
-        runOnJS(onSlide)(clampedValue);
-      }
-    });
-
   const thumbOffset = useDerivedValue(() => {
     const nextValue = progress.value * width - offsetOverflow;
     if (nextValue >= minDrag && nextValue <= maxDrag - offsetOverflow) {
@@ -198,8 +164,55 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
     thumbAnimatedStyle,
   ];
 
-  return (
-    <GestureDetector gesture={tap}>
+  //a bit of safe calling
+  const _onSlideStart = (progressVal: number) => onSlideStart?.(progressVal);
+
+  const _onSlide = (progressVal: number) => onSlide?.(progressVal);
+
+  const _onSlideFinish = (progressVal: number) => onSlideFinish?.(progressVal);
+
+  const pan = Gesture.Pan()
+    .onBegin(() => {
+      if (!tapActive) {
+        runOnJS(_onSlideStart)(progress.value);
+        startX.value = progress.value * xRange;
+      }
+    })
+    .onUpdate(event => {
+      const nextValue = startX.value + event.translationX;
+      const clampedValue = Math.max(0, Math.min(nextValue / xRange, 1));
+      progress.value = clampedValue;
+      runOnJS(_onSlide)(clampedValue);
+    })
+    .onFinalize(() => runOnJS(_onSlideFinish)(progress.value));
+
+  if (tapActive) {
+    const tap = Gesture.Tap()
+      .onBegin(() => runOnJS(_onSlideStart)(progress.value))
+      .maxDuration(150)
+      .onTouchesDown(event => {
+        const targetX = event.allTouches[0].x - Math.max(12, offsetOverflow);
+        //we need complement of x on rtl
+        const progressVal = isRTL ? 1 - Math.abs(targetX / xRange) : targetX / xRange;
+        const clampedValue = Math.max(0, Math.min(progressVal, 1));
+        progress.value = clampedValue;
+        startX.value = clampedValue * xRange;
+        runOnJS(_onSlide)(clampedValue);
+      });
+
+    return (
+      <GestureDetector gesture={Gesture.Simultaneous(tap, pan)}>
+        <View style={[styles.root, rootStyle]}>
+          <View style={trackStyle}>
+            <Animated.View style={progressStyle} />
+            <Animated.View style={bufferStyle} />
+            <Animated.View hitSlop={THUMB_HIT_SLOP} style={thumbStyle} />
+          </View>
+        </View>
+      </GestureDetector>
+    );
+  } else {
+    return (
       <View style={[styles.root, rootStyle]}>
         <View style={trackStyle}>
           <Animated.View style={progressStyle} />
@@ -209,8 +222,8 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
           </GestureDetector>
         </View>
       </View>
-    </GestureDetector>
-  );
+    );
+  }
 };
 
 export default forwardRef(SliderComponent);
