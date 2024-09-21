@@ -4,7 +4,7 @@
   "description": "A dedicated progress slider for video players in React-native.",
   "main": "src/index.tsx",
   "directories": {
-    "example": "example"
+    "example": "testapp"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
