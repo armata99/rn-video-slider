@@ -29,7 +29,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
   },
-  thumb: {borderRadius: 50, elevation: 5},
+  thumb: {
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.4,
+    shadowOffset: {width: 0, height: 0},
+    shadowRadius: 5,
+  },
 });
 
 const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
@@ -159,6 +165,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
       ...styles.thumb,
       width: thumbSize,
       height: thumbSize,
+      borderRadius: thumbSize / 2,
       backgroundColor: thumbColor,
     },
     thumbAnimatedStyle,
