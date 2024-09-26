@@ -1,5 +1,5 @@
 import React, {ForwardedRef, forwardRef, useImperativeHandle} from 'react';
-import {I18nManager, Platform, StyleSheet, View, ViewStyle} from 'react-native';
+import {I18nManager, StyleSheet, View, ViewStyle} from 'react-native';
 import {GestureDetector, Gesture} from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -16,17 +16,12 @@ import {DEFAULT_SLIDER_SPRING_CONFIG, THUMB_HIT_SLOP} from './configs';
 const styles = StyleSheet.create({
   root: {padding: 10},
   track: {
-    overflow: 'visible',
     justifyContent: 'center',
   },
   progress: {
-    overflow: 'visible',
-    justifyContent: 'center',
     position: 'absolute',
   },
   buffer: {
-    overflow: 'visible',
-    justifyContent: 'center',
     position: 'absolute',
   },
   thumb: {
@@ -51,7 +46,6 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
     onSlideStart,
     onSlide,
     isRTL = I18nManager.isRTL,
-    compensateForceRTL: _compForceRTL = false,
     rootStyle,
     tapActive = true,
   } = props;
@@ -64,7 +58,6 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
   const minDrag: number = -offsetOverflow;
   const xRange = isRTL ? -width : width;
   const startX = useSharedValue<number>(0); //to memorize the start point
-  const compensateForceRTL: boolean = Platform.OS === 'android' ? _compForceRTL : false;
 
   useImperativeHandle(ref, () => ({
     setProgress: p => (progress.value = withSpring(p, DEFAULT_SLIDER_SPRING_CONFIG)),
@@ -129,14 +122,13 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
 
   const thumbAnimatedStyle = useAnimatedStyle((): ViewStyle => {
     return {
-      transform: [{translateX: isRTL || compensateForceRTL ? -thumbOffset.value : thumbOffset.value}],
+      transform: [{translateX: isRTL ? -thumbOffset.value : thumbOffset.value}],
     };
   });
 
   const trackStyle: ViewStyle = {
     ...styles.track,
-    direction: isRTL ? 'rtl' : 'ltr', //this won't work if force RTL is activated at android native level.
-    ...(compensateForceRTL && {transform: [{rotateY: '180deg'}]}), //so this will fix it
+    direction: isRTL ? 'rtl' : 'ltr',
     backgroundColor: trackColor,
     width,
     height,

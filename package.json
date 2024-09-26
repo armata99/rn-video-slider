@@ -29,6 +29,7 @@
   "author": "armata99",
   "license": "MIT",
   "peerDependencies": {
+    "react-native": "^0.xx.x",
     "react-native-gesture-handler": "^2.x.x",
     "react-native-reanimated": "^3.x.x"
   },
