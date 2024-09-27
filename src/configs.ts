@@ -1,6 +1,8 @@
-export const THUMB_HIT_SLOP = {top: 15, bottom: 15, left: 15, right: 15};
+import {SpringConfig} from 'react-native-reanimated/lib/typescript/animation/springUtils';
 
-export const DEFAULT_SLIDER_SPRING_CONFIG: object = {
+export const ThumbHitSlop = {top: 15, bottom: 15, left: 15, right: 15};
+
+export const SliderSpringConfig: SpringConfig = {
   damping: 250,
   mass: 1,
   stiffness: 50,

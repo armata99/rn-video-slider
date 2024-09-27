@@ -11,7 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {ISlider, ISliderProps} from './types';
-import {DEFAULT_SLIDER_SPRING_CONFIG, THUMB_HIT_SLOP} from './configs';
+import {SliderSpringConfig, ThumbHitSlop} from './configs';
 
 const styles = StyleSheet.create({
   root: {padding: 10},
@@ -62,7 +62,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
   const shouldInvertDir: boolean = (isRTL && Platform.OS === 'ios') || (Platform.OS === 'android' && I18nManager.isRTL);
 
   useImperativeHandle(ref, () => ({
-    setProgress: p => (progress.value = withSpring(p, DEFAULT_SLIDER_SPRING_CONFIG)),
+    setProgress: p => (progress.value = withSpring(p, SliderSpringConfig)),
     setColdProgress: p => (progress.value = p),
     setBufferProgress: p => (bufferProgress.value = p),
   }));
@@ -208,7 +208,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
           <View style={trackStyle}>
             <Animated.View style={progressStyle} />
             <Animated.View style={bufferStyle} />
-            <Animated.View hitSlop={THUMB_HIT_SLOP} style={thumbStyle} />
+            <Animated.View hitSlop={ThumbHitSlop} style={thumbStyle} />
           </View>
         </View>
       </GestureDetector>
@@ -220,7 +220,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
           <Animated.View style={progressStyle} />
           <Animated.View style={bufferStyle} />
           <GestureDetector gesture={pan}>
-            <Animated.View hitSlop={THUMB_HIT_SLOP} style={thumbStyle} />
+            <Animated.View hitSlop={ThumbHitSlop} style={thumbStyle} />
           </GestureDetector>
         </View>
       </View>
