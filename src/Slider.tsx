@@ -1,5 +1,5 @@
 import React, {ForwardedRef, forwardRef, useImperativeHandle} from 'react';
-import {I18nManager, StyleSheet, View, ViewStyle} from 'react-native';
+import {I18nManager, StyleSheet, View, ViewStyle, Platform} from 'react-native';
 import {GestureDetector, Gesture} from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -58,6 +58,8 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
   const minDrag: number = -offsetOverflow;
   const xRange = isRTL ? -width : width;
   const startX = useSharedValue<number>(0); //to memorize the start point
+  const shouldRotateTrack: boolean = I18nManager.isRTL !== isRTL && Platform.OS === 'android';
+  const shouldInvertDir: boolean = (isRTL && Platform.OS === 'ios') || (Platform.OS === 'android' && I18nManager.isRTL);
 
   useImperativeHandle(ref, () => ({
     setProgress: p => (progress.value = withSpring(p, DEFAULT_SLIDER_SPRING_CONFIG)),
@@ -122,13 +124,14 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
 
   const thumbAnimatedStyle = useAnimatedStyle((): ViewStyle => {
     return {
-      transform: [{translateX: isRTL ? -thumbOffset.value : thumbOffset.value}],
+      transform: [{translateX: shouldInvertDir ? -thumbOffset.value : thumbOffset.value}],
     };
   });
 
   const trackStyle: ViewStyle = {
     ...styles.track,
-    direction: isRTL ? 'rtl' : 'ltr',
+    direction: isRTL ? 'rtl' : 'ltr', //android does not support this props. it can be fixed it with below prop
+    ...(shouldRotateTrack && {transform: [{rotateY: '180deg'}]}),
     backgroundColor: trackColor,
     width,
     height,
