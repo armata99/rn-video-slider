@@ -18,7 +18,6 @@ export interface ISliderProps {
   bufferProgressColor?: string;
   trackColor?: string;
   isRTL?: boolean;
-  compensateForceRTL?: boolean;
   rootStyle?: ViewStyle;
   tapActive?: boolean;
 }

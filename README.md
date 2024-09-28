@@ -1,5 +1,6 @@
 # rn-video-slider
-A dedicated progress slider for video players in React-native.
+A dedicated progress slider for video player's custom user interfaces
+in React-Native. It can also be used in audio players because why not? 😎
 
 <img src="https://github.com/armata99/assets/blob/master/rn-video-slider/main.gif" alt="Demonstration">
 
@@ -59,6 +60,9 @@ const ControlSet = () => {
   )
 }
 ```
+**Note:** You can see the Component in action by cloning this
+repo and building its test app. Just head over to `testapp`
+directory, install the dependencies and run it on Android or IOS.
 
 ## Properties
 Here is the list of properties that you can set or override.
@@ -100,10 +104,20 @@ Here is the list of methods that can be called via reference.
 
 **Note:** progress values are a float from 0 to 1
 
-## TODO
-- [ ] write necessary tests
-- [ ] add expansion feature
+## Known issues
+Tapping the Slider on Android will cause it to bounce back and forward
+sometimes. I've seen this issue being reported in community as well,
+yet I haven't found a certain solution to fix it. It's also not clear to
+me that whether it should be fixed at this side or Exoplayer's side.
+
+## TODO list
+- [ ] workaround bouncing issue on Android (maybe)
+- [ ] add hovering bubble feature
+- [ ] add in-code docs
+- [ ] ensure fabric support
 - [ ] more and better demo gifs
+- [ ] cleanups and refactors
+- [x] ~~bump test-app dependencies up~~
 - [x] ~~write a better example~~
 - [x] ~~fix delay between thumb and track while sliding fast~~
 - [x] ~~implement tap to seek feature~~
@@ -122,7 +136,7 @@ it in details. You will always be welcomed.
 ## Acknowledgement
 The idea behind this is from `react-native-reanimated-slider`.
 Since the mentioned module is written with Reanimated v1 API, and hasn't
-been updated for a long period, I decided to remake it.
+been updated for a long time, I decided to remake it.
 
 ## License
 [MIT License](https://opensource.org/licenses/MIT)

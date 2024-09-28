@@ -1,5 +1,5 @@
 import React, {ForwardedRef, forwardRef, useImperativeHandle} from 'react';
-import {I18nManager, Platform, StyleSheet, View, ViewStyle} from 'react-native';
+import {I18nManager, StyleSheet, View, ViewStyle, Platform} from 'react-native';
 import {GestureDetector, Gesture} from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -11,25 +11,26 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {ISlider, ISliderProps} from './types';
-import {DEFAULT_SLIDER_SPRING_CONFIG, THUMB_HIT_SLOP} from './configs';
+import {SliderSpringConfig, ThumbHitSlop} from './configs';
 
 const styles = StyleSheet.create({
   root: {padding: 10},
   track: {
-    overflow: 'visible',
     justifyContent: 'center',
   },
   progress: {
-    overflow: 'visible',
-    justifyContent: 'center',
     position: 'absolute',
   },
   buffer: {
-    overflow: 'visible',
-    justifyContent: 'center',
     position: 'absolute',
   },
-  thumb: {borderRadius: 50, elevation: 5},
+  thumb: {
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.4,
+    shadowOffset: {width: 0, height: 0},
+    shadowRadius: 5,
+  },
 });
 
 const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
@@ -45,7 +46,6 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
     onSlideStart,
     onSlide,
     isRTL = I18nManager.isRTL,
-    compensateForceRTL: _compForceRTL = false,
     rootStyle,
     tapActive = true,
   } = props;
@@ -58,10 +58,11 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
   const minDrag: number = -offsetOverflow;
   const xRange = isRTL ? -width : width;
   const startX = useSharedValue<number>(0); //to memorize the start point
-  const compensateForceRTL: boolean = Platform.OS === 'android' ? _compForceRTL : false;
+  const shouldRotateTrack: boolean = I18nManager.isRTL !== isRTL && Platform.OS === 'android';
+  const shouldInvertDir: boolean = (isRTL && Platform.OS === 'ios') || (Platform.OS === 'android' && I18nManager.isRTL);
 
   useImperativeHandle(ref, () => ({
-    setProgress: p => (progress.value = withSpring(p, DEFAULT_SLIDER_SPRING_CONFIG)),
+    setProgress: p => (progress.value = withSpring(p, SliderSpringConfig)),
     setColdProgress: p => (progress.value = p),
     setBufferProgress: p => (bufferProgress.value = p),
   }));
@@ -123,14 +124,14 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
 
   const thumbAnimatedStyle = useAnimatedStyle((): ViewStyle => {
     return {
-      transform: [{translateX: isRTL || compensateForceRTL ? -thumbOffset.value : thumbOffset.value}],
+      transform: [{translateX: shouldInvertDir ? -thumbOffset.value : thumbOffset.value}],
     };
   });
 
   const trackStyle: ViewStyle = {
     ...styles.track,
-    direction: isRTL ? 'rtl' : 'ltr', //this won't work if force RTL is activated at android native level.
-    ...(compensateForceRTL && {transform: [{rotateY: '180deg'}]}), //so this will fix it
+    direction: isRTL ? 'rtl' : 'ltr', //android does not support this props. it can be fixed it with below prop
+    ...(shouldRotateTrack && {transform: [{rotateY: '180deg'}]}),
     backgroundColor: trackColor,
     width,
     height,
@@ -159,6 +160,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
       ...styles.thumb,
       width: thumbSize,
       height: thumbSize,
+      borderRadius: thumbSize / 2,
       backgroundColor: thumbColor,
     },
     thumbAnimatedStyle,
@@ -206,7 +208,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
           <View style={trackStyle}>
             <Animated.View style={progressStyle} />
             <Animated.View style={bufferStyle} />
-            <Animated.View hitSlop={THUMB_HIT_SLOP} style={thumbStyle} />
+            <Animated.View hitSlop={ThumbHitSlop} style={thumbStyle} />
           </View>
         </View>
       </GestureDetector>
@@ -218,7 +220,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
           <Animated.View style={progressStyle} />
           <Animated.View style={bufferStyle} />
           <GestureDetector gesture={pan}>
-            <Animated.View hitSlop={THUMB_HIT_SLOP} style={thumbStyle} />
+            <Animated.View hitSlop={ThumbHitSlop} style={thumbStyle} />
           </GestureDetector>
         </View>
       </View>
