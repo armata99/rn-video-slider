@@ -3,6 +3,7 @@ A dedicated progress slider for video player's custom user interfaces
 in React-Native. It can also be used in audio players because why not? 😎
 
 <img src="https://github.com/armata99/assets/blob/master/rn-video-slider/main.gif" alt="Demonstration">
+<img src="https://github.com/armata99/assets/blob/master/rn-video-slider/buffer.gif" alt="Buffer Demonstration">
 
 ## Why this module?
 - superior performance thanks to Reanimated library
