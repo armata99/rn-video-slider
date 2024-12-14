@@ -117,9 +117,9 @@ me that whether it should be fixed at this side or Exoplayer's side.
 - [ ] workaround bouncing issue on Android (maybe)
 - [ ] add hovering bubble feature
 - [ ] add in-code docs
-- [ ] ensure fabric support
-- [ ] more and better demo gifs
-- [ ] cleanups and refactors
+- [x] ~~ensure fabric support~~
+- [x] ~~more and better demo gifs~~
+- [x] ~~cleanups and refactors~~
 - [x] ~~bump test-app dependencies up~~
 - [x] ~~write a better example~~
 - [x] ~~fix delay between thumb and track while sliding fast~~
