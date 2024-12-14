@@ -1,4 +1,13 @@
 
+## [v0.5.0] - 2024-12-14
+### :sparkles: New Features
+- [`ebd5fef`](https://github.com/armata99/rn-video-slider/commit/ebd5fef476cec30e0c09d9993c79da84617a867d) - added props for initial progress and buffer initial progress *(commit by [@armata99](https://github.com/armata99))*
+- [`a4a3490`](https://github.com/armata99/rn-video-slider/commit/a4a34904fd0441925a96a431ddbf974ba80deab0) - internal mechanism to prevent feeding slider's callback into via ref methods *(commit by [@armata99](https://github.com/armata99))*
+
+### :wrench: Chores
+- [`30e3058`](https://github.com/armata99/rn-video-slider/commit/30e305830c3fb6ece2cc06dadbad1ad0e06401e4) - bumped test app dependencies to rn 0.76.3 *(commit by [@armata99](https://github.com/armata99))*
+
+
 ## [v0.4.1] - 2024-09-28
 ### :bug: Bug Fixes
 - [`b2e50f0`](https://github.com/armata99/rn-video-slider/commit/b2e50f0338e524888546c7b1f147f7b565634061) - no thumb shadow on ios *(commit by [@armata99](https://github.com/armata99))*
@@ -35,3 +44,4 @@
 [v0.3.2]: https://github.com/armata99/rn-video-slider/compare/v0.3.1...v0.3.2
 [v0.4.0]: https://github.com/armata99/rn-video-slider/compare/v0.3.2...v0.4.0
 [v0.4.1]: https://github.com/armata99/rn-video-slider/compare/v0.4.0...v0.4.1
+[v0.5.0]: https://github.com/armata99/rn-video-slider/compare/v0.4.1...v0.5.0
