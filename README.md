@@ -68,18 +68,20 @@ directory, install the dependencies and run it on Android or IOS.
 ## Properties
 Here is the list of properties that you can set or override.
 
-|        Name         |      Type       | Required |     Default Value     | Description                                                                                 |
-|:-------------------:|:---------------:|:--------:|:---------------------:|---------------------------------------------------------------------------------------------|
-|        width        |     number      |   Yes    |       undefined       | width of slider track                                                                       |
-|       height        |     number      |    No    |           3           | height of slider track                                                                      |
-|      thumbSize      |     number      |    No    |          12           | diameter of sliding thumb                                                                   |
-|     thumbColor      |     string      |    No    |        #FFFFFF        | color of sliding thumb                                                                      |
-|    progressColor    |     string      |    No    |        #FFFFFF        | color of progress indicator                                                                 |
-| bufferProgressColor |     string      |    No    | rgba(255,255,255,0.5) | color of buffer progress indicator                                                          |
-|     trackColor      |     string      |    No    | rgba(255,255,255,0.2) | color of underlying view                                                                    |
-|      rootStyle      |    ViewStyle    |    No    |       undefined       | style addon for root view                                                                   |
-|        isRTL        |     boolean     |    No    |   I18nManager.isRTL   | overrides direction of movement. setting to "true" makes the slider go from right to left.  |
-|      tapActive      |     boolean     |    No    |         true          | activates tap gesture. when set to "true", onSlide function fires on receiving single taps. |
+|         Name          |   Type    | Required |     Default Value     | Description                                                                                 |
+|:---------------------:|:---------:|:--------:|:---------------------:|---------------------------------------------------------------------------------------------|
+|         width         |  number   |   Yes    |       undefined       | width of slider track                                                                       |
+|        height         |  number   |    No    |           3           | height of slider track                                                                      |
+|       thumbSize       |  number   |    No    |          12           | diameter of sliding thumb                                                                   |
+|      thumbColor       |  string   |    No    |        #FFFFFF        | color of sliding thumb                                                                      |
+|     progressColor     |  string   |    No    |        #FFFFFF        | color of progress indicator                                                                 |
+|  bufferProgressColor  |  string   |    No    | rgba(255,255,255,0.5) | color of buffer progress indicator                                                          |
+|      trackColor       |  string   |    No    | rgba(255,255,255,0.2) | color of underlying view                                                                    |
+|       rootStyle       | ViewStyle |    No    |       undefined       | style addon for root view                                                                   |
+|         isRTL         |  boolean  |    No    |   I18nManager.isRTL   | overrides direction of movement. setting to "true" makes the slider go from right to left.  |
+|       tapActive       |  boolean  |    No    |         true          | activates tap gesture. when set to "true", onSlide function fires on receiving single taps. |
+|    initialProgress    |  number   |    No    |           0           | sets the initial progress value.                                                            |
+| bufferInitialProgress |  number   |    No    |           0           | sets the initial buffer progress value.                                                     |
 
 **Note:** Root view has a default padding equal to 10.
 Override it in root style if you need to.

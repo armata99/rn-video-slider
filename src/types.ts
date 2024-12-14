@@ -20,4 +20,6 @@ export interface ISliderProps {
   isRTL?: boolean;
   rootStyle?: ViewStyle;
   tapActive?: boolean;
+  initialProgress?: number;
+  bufferInitialProgress?: number;
 }

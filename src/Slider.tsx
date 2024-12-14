@@ -48,11 +48,13 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
     isRTL = I18nManager.isRTL,
     rootStyle,
     tapActive = true,
+    initialProgress = 0,
+    bufferInitialProgress = 0,
   } = props;
 
   //calculated values
-  const progress = useSharedValue<number>(0);
-  const bufferProgress = useSharedValue<number>(0);
+  const progress = useSharedValue<number>(initialProgress);
+  const bufferProgress = useSharedValue<number>(bufferInitialProgress);
   const offsetOverflow: number = thumbSize / 2;
   const maxDrag: number = width;
   const minDrag: number = -offsetOverflow;
