@@ -1,4 +1,4 @@
-import React, {ForwardedRef, forwardRef, useImperativeHandle} from 'react';
+import React, {ForwardedRef, forwardRef, useImperativeHandle, useRef} from 'react';
 import {I18nManager, StyleSheet, View, ViewStyle, Platform} from 'react-native';
 import {GestureDetector, Gesture} from 'react-native-gesture-handler';
 import Animated, {
@@ -62,11 +62,20 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
   const startX = useSharedValue<number>(0); //to memorize the start point
   const shouldRotateTrack: boolean = I18nManager.isRTL !== isRTL && Platform.OS === 'android';
   const shouldInvertDir: boolean = (isRTL && Platform.OS === 'ios') || (Platform.OS === 'android' && I18nManager.isRTL);
+  const isSliding = useRef<boolean>(false);
 
   useImperativeHandle(ref, () => ({
-    setProgress: p => (progress.value = withSpring(p, SliderSpringConfig)),
-    setColdProgress: p => (progress.value = p),
-    setBufferProgress: p => (bufferProgress.value = p),
+    setProgress: (p: number) => {
+      if (!isSliding.current) {
+        progress.value = withSpring(p, SliderSpringConfig);
+      }
+    },
+    setColdProgress:(p: number) => {
+      if (!isSliding.current) {
+        progress.value = p;
+      }
+    },
+    setBufferProgress: (p: number) => (bufferProgress.value = p),
   }));
 
   const thumbOffset = useDerivedValue(() => {
@@ -177,6 +186,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
 
   const pan = Gesture.Pan()
     .onBegin(() => {
+      isSliding.current = true;
       if (!tapActive) {
         runOnJS(_onSlideStart)(progress.value);
         startX.value = progress.value * xRange;
@@ -188,7 +198,10 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
       progress.value = clampedValue;
       runOnJS(_onSlide)(clampedValue);
     })
-    .onFinalize(() => runOnJS(_onSlideFinish)(progress.value));
+    .onFinalize(() => {
+      isSliding.current = false;
+      runOnJS(_onSlideFinish)(progress.value);
+    });
 
   if (tapActive) {
     const tap = Gesture.Tap()
