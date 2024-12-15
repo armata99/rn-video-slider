@@ -178,15 +178,20 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
   ];
 
   //a bit of safe calling
-  const _onSlideStart = (progressVal: number) => onSlideStart?.(progressVal);
+  const _onSlideStart = (progressVal: number) => {
+    isSliding.current = true;
+    onSlideStart?.(progressVal);
+  };
 
   const _onSlide = (progressVal: number) => onSlide?.(progressVal);
 
-  const _onSlideFinish = (progressVal: number) => onSlideFinish?.(progressVal);
+  const _onSlideFinish = (progressVal: number) => {
+    isSliding.current = false;
+    onSlideFinish?.(progressVal);
+  };
 
   const pan = Gesture.Pan()
     .onBegin(() => {
-      isSliding.current = true;
       if (!tapActive) {
         runOnJS(_onSlideStart)(progress.value);
         startX.value = progress.value * xRange;
@@ -198,10 +203,7 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISlider>) => {
       progress.value = clampedValue;
       runOnJS(_onSlide)(clampedValue);
     })
-    .onFinalize(() => {
-      isSliding.current = false;
-      runOnJS(_onSlideFinish)(progress.value);
-    });
+    .onFinalize(() => runOnJS(_onSlideFinish)(progress.value));
 
   if (tapActive) {
     const tap = Gesture.Tap()
