@@ -1,4 +1,12 @@
 
+## [v0.5.1] - 2024-12-15
+### :bug: Bug Fixes
+- [`0b42834`](https://github.com/armata99/rn-video-slider/commit/0b42834319d1f38c633a3ef6dda25ae95111c98e) - relocated isSliding reference into slide start/finish callbacks *(commit by [@armata99](https://github.com/armata99))*
+
+### :recycle: Refactors
+- [`494abfe`](https://github.com/armata99/rn-video-slider/commit/494abfe333319dae5b20f9699e577391156ca3c3) - introduced a new interface for slider's reference *(commit by [@armata99](https://github.com/armata99))*
+
+
 ## [v0.5.0] - 2024-12-14
 ### :sparkles: New Features
 - [`ebd5fef`](https://github.com/armata99/rn-video-slider/commit/ebd5fef476cec30e0c09d9993c79da84617a867d) - added props for initial progress and buffer initial progress *(commit by [@armata99](https://github.com/armata99))*
@@ -45,3 +53,4 @@
 [v0.4.0]: https://github.com/armata99/rn-video-slider/compare/v0.3.2...v0.4.0
 [v0.4.1]: https://github.com/armata99/rn-video-slider/compare/v0.4.0...v0.4.1
 [v0.5.0]: https://github.com/armata99/rn-video-slider/compare/v0.4.1...v0.5.0
+[v0.5.1]: https://github.com/armata99/rn-video-slider/compare/v0.5.0...v0.5.1
