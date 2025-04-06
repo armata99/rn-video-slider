@@ -37,11 +37,11 @@ That will be it.
 
 ```typescript jsx
 import {Dimensions} from "react-native";
-import Slider, {ISlider} from "rn-video-slider";
+import Slider, {SliderRef} from "rn-video-slider";
 
 const ControlSet = () => {
 
-  const sliderRef = React.createRef<ISlider>();
+  const sliderRef = React.createRef<SliderRef>();
   //call below function in video progress callback
   //sliderRef.current?.setProgress(0.5);
 

@@ -1,20 +1,18 @@
 import {ViewStyle} from 'react-native';
 
 /**
- * @Deprecated use ISliderRef instead.
+ * type of slider's reference object
  */
-export interface ISlider {
+export interface SliderRef {
   setProgress: (value: number) => void;
   setColdProgress: (value: number) => void;
   setBufferProgress: (value: number) => void;
 }
 
 /**
- * this will have its parent properties on final release
+ * type of slider's props object
  */
-export interface ISliderRef extends ISlider {}
-
-export interface ISliderProps {
+export interface SliderProps {
   width: number;
   height?: number;
   thumbSize?: number;

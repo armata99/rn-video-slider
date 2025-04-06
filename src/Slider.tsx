@@ -10,7 +10,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import {ISliderProps, ISliderRef} from './types';
+import {SliderProps, SliderRef} from './types';
 import {SliderSpringConfig, ThumbHitSlop} from './configs';
 
 const styles = StyleSheet.create({
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISliderRef | undefined>) => {
+const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undefined>) => {
   const {
     width,
     height = 3,
