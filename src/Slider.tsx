@@ -39,6 +39,7 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
     height = 3,
     thumbSize = 12,
     thumbColor = '#ffffff',
+    thumbStyle: _thumbStyle,
     progressColor = '#ffffff',
     bufferProgressColor = 'rgba(255,255,255, 0.5)',
     trackColor = 'rgba(255,255,255, 0.2)',
@@ -166,7 +167,7 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
     bufferAnimatedStyle,
   ];
 
-  const thumbStyle: ViewStyle[] = [
+  const thumbStyle: (ViewStyle | undefined)[] = [
     {
       ...styles.thumb,
       width: thumbSize,
@@ -174,6 +175,7 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
       borderRadius: thumbSize / 2,
       backgroundColor: thumbColor,
     },
+    _thumbStyle,
     thumbAnimatedStyle,
   ];
 

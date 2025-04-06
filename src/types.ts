@@ -42,6 +42,11 @@ export interface SliderProps {
    */
   thumbColor?: string;
   /**
+   * style override for thumb view. Has higher priority than
+   * thumbSize and thumbColor
+   */
+  thumbStyle?: ViewStyle;
+  /**
    * color of progress indicator
    */
   progressColor?: string;

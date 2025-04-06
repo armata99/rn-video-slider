@@ -74,6 +74,7 @@ Here is the list of properties that you can set or override.
 |        height         |  number   |    No    |           3           | height of slider track                                                                          |
 |       thumbSize       |  number   |    No    |          12           | diameter of sliding thumb                                                                       |
 |      thumbColor       |  string   |    No    |        #FFFFFF        | color of sliding thumb                                                                          |
+|      thumbStyle       | ViewStyle |    No    |       undefined       | style override for thumb view. It has higher priority than thumbSize and thumbColor.            |
 |     progressColor     |  string   |    No    |        #FFFFFF        | color of progress indicator                                                                     |
 |  bufferProgressColor  |  string   |    No    | rgba(255,255,255,0.5) | color of buffer progress indicator                                                              |
 |      trackColor       |  string   |    No    | rgba(255,255,255,0.2) | color of underlying view                                                                        |
@@ -85,6 +86,8 @@ Here is the list of properties that you can set or override.
 
 **Note:** Root view has a default padding equal to 10.
 Override it in root style if you need to.
+
+**Note2:** You can disable thumb shadow by passing appropriate thumbStyle. (`elevation: 0, shadowOpacity: 0`)
 
 ## Event properties
 Here is the list of callbacks to use.
