@@ -1,7 +1,7 @@
 import React, {useRef, useState} from 'react';
 import {Dimensions, StyleSheet, View, Text} from 'react-native';
 import Video, {OnLoadData, OnProgressData, VideoRef} from 'react-native-video';
-import Slider, {ISlider} from './lib';
+import Slider, {SliderRef, Bubble} from '../../src';
 import ControlButton from './ControlButton';
 
 const styles = StyleSheet.create({
