@@ -1,4 +1,15 @@
 
+## [v0.6.0] - 2025-04-13
+### :sparkles: New Features
+- [`2826846`](https://github.com/armata99/rn-video-slider/commit/2826846ce325e974b0ece92e8b25ef06e75a74dc) - style override for thumb view *(commit by [@armata99](https://github.com/armata99))*
+- [`f75a237`](https://github.com/armata99/rn-video-slider/commit/f75a2373dc27c795e412226c25a731de3efa75e9) - hovering bubble view over progress thumb view *(commit by [@armata99](https://github.com/armata99))*
+
+### :recycle: Refactors
+- [`c5eede9`](https://github.com/armata99/rn-video-slider/commit/c5eede99afec5fd4e284059ff10d3728aac755e7) - props and ref interfaces are renamed *(commit by [@armata99](https://github.com/armata99))*
+- [`08f25ae`](https://github.com/armata99/rn-video-slider/commit/08f25ae49a4e04e12a19b88047f8d3f9066c4591) - change in linking structure to support instant code modification of library in test app *(commit by [@armata99](https://github.com/armata99))*
+- [`bafefb7`](https://github.com/armata99/rn-video-slider/commit/bafefb778b6b9b712e82f390f0fc91b20fc2713b) - relocated and renamed some of the functions and added memoize *(commit by [@armata99](https://github.com/armata99))*
+
+
 ## [v0.5.1] - 2024-12-15
 ### :bug: Bug Fixes
 - [`0b42834`](https://github.com/armata99/rn-video-slider/commit/0b42834319d1f38c633a3ef6dda25ae95111c98e) - relocated isSliding reference into slide start/finish callbacks *(commit by [@armata99](https://github.com/armata99))*
@@ -54,3 +65,4 @@
 [v0.4.1]: https://github.com/armata99/rn-video-slider/compare/v0.4.0...v0.4.1
 [v0.5.0]: https://github.com/armata99/rn-video-slider/compare/v0.4.1...v0.5.0
 [v0.5.1]: https://github.com/armata99/rn-video-slider/compare/v0.5.0...v0.5.1
+[v0.6.0]: https://github.com/armata99/rn-video-slider/compare/v0.5.1...v0.6.0
