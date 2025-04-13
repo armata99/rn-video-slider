@@ -1,3 +1,6 @@
 import Slider from './Slider';
+import Bubble from './Bubble';
+
 export default Slider;
-export type {SliderRef, SliderProps} from './types';
+export {Bubble};
+export type {SliderRef, SliderProps, BubbleProps} from './types';

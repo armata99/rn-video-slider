@@ -1,4 +1,5 @@
-import {ViewStyle} from 'react-native';
+import React from 'react';
+import {TextStyle, ViewStyle} from 'react-native';
 
 /**
  * type of slider's reference object
@@ -93,4 +94,35 @@ export interface SliderProps {
    * @param value is progress value at the moment which is between 0 and 1
    */
   onSlideFinish?: (value: number) => void;
+  /**
+   * renders a hovering bubble above thumb view when it's
+   * held via touch gesture.
+   * @param value is current progress of the slider
+   */
+  renderBubble?: (value: number) => React.JSX.Element;
+  /**
+   * style object that overrides default style of bubble container view
+   * which is absolutely positioned inside thumb view.
+   */
+  bubbleContainerStyle?: ViewStyle;
+  /**
+   * determines when bubble should show up
+   */
+  bubbleVisibility?: 'always' | 'onTouch';
+}
+
+export interface BubbleProps {
+  /**
+   * Text to display at center of bubble
+   * Usually it's video time for corresponding to the current progress.
+   */
+  text: string;
+  /**
+   * Custom style object for the bubble's root view
+   */
+  rootStyle?: ViewStyle;
+  /**
+   * Custom style object for the bubble's text element
+   */
+  textStyle?: TextStyle;
 }

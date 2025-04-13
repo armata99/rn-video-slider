@@ -1,4 +1,4 @@
-import React, {ForwardedRef, forwardRef, useImperativeHandle, useRef} from 'react';
+import React, {ForwardedRef, forwardRef, useImperativeHandle, useMemo, useRef, useState} from 'react';
 import {I18nManager, StyleSheet, View, ViewStyle, Platform} from 'react-native';
 import {GestureDetector, Gesture} from 'react-native-gesture-handler';
 import Animated, {
@@ -30,6 +30,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowOffset: {width: 0, height: 0},
     shadowRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bubbleContainer: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
@@ -46,6 +53,9 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
     onSlideFinish,
     onSlideStart,
     onSlide,
+    renderBubble,
+    bubbleContainerStyle,
+    bubbleVisibility = 'onTouch',
     isRTL = I18nManager.isRTL,
     rootStyle,
     tapActive = true,
@@ -55,6 +65,9 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
 
   //calculated values
   const progress = useSharedValue<number>(initialProgress);
+  const [progressBackup, setProgressBackup] = useState<number | undefined>(
+    bubbleVisibility === 'always' ? initialProgress : undefined,
+  ); //this is used in rendering bubble to avoid accessing shared value during render
   const bufferProgress = useSharedValue<number>(bufferInitialProgress);
   const offsetOverflow: number = thumbSize / 2;
   const maxDrag: number = width;
@@ -69,9 +82,12 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
     setProgress: (p: number) => {
       if (!isSliding.current) {
         progress.value = withSpring(p, SliderSpringConfig);
+        if (bubbleVisibility === 'always') {
+          setProgressBackup(p);
+        }
       }
     },
-    setColdProgress:(p: number) => {
+    setColdProgress: (p: number) => {
       if (!isSliding.current) {
         progress.value = p;
       }
@@ -167,28 +183,22 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
     bufferAnimatedStyle,
   ];
 
-  const thumbStyle: (ViewStyle | undefined)[] = [
-    {
-      ...styles.thumb,
-      width: thumbSize,
-      height: thumbSize,
-      borderRadius: thumbSize / 2,
-      backgroundColor: thumbColor,
-    },
-    _thumbStyle,
-    thumbAnimatedStyle,
-  ];
-
-  //a bit of safe calling
   const _onSlideStart = (progressVal: number) => {
     isSliding.current = true;
+    setProgressBackup(progressVal);
     onSlideStart?.(progressVal);
   };
 
-  const _onSlide = (progressVal: number) => onSlide?.(progressVal);
+  const _onSlide = (progressVal: number) => {
+    setProgressBackup(progressVal);
+    onSlide?.(progressVal);
+  };
 
   const _onSlideFinish = (progressVal: number) => {
     isSliding.current = false;
+    if (bubbleVisibility === 'onTouch') {
+      setProgressBackup(undefined);
+    }
     onSlideFinish?.(progressVal);
   };
 
@@ -206,6 +216,27 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
       runOnJS(_onSlide)(clampedValue);
     })
     .onFinalize(() => runOnJS(_onSlideFinish)(progress.value));
+
+  const Thumb = useMemo(() => {
+    const thumbStyle: (ViewStyle | undefined)[] = [
+      {
+        ...styles.thumb,
+        width: thumbSize,
+        height: thumbSize,
+        borderRadius: thumbSize / 2,
+        backgroundColor: thumbColor,
+      },
+      _thumbStyle,
+      thumbAnimatedStyle,
+    ];
+    return (
+      <Animated.View hitSlop={ThumbHitSlop} style={thumbStyle}>
+        <View style={[styles.bubbleContainer, {bottom: thumbSize + 15}, bubbleContainerStyle]}>
+          {progressBackup !== undefined && renderBubble?.(progressBackup)}
+        </View>
+      </Animated.View>
+    );
+  }, [_thumbStyle, bubbleContainerStyle, progressBackup, renderBubble, thumbAnimatedStyle, thumbColor, thumbSize]);
 
   if (tapActive) {
     const tap = Gesture.Tap()
@@ -227,7 +258,7 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
           <View style={trackStyle}>
             <Animated.View style={progressStyle} />
             <Animated.View style={bufferStyle} />
-            <Animated.View hitSlop={ThumbHitSlop} style={thumbStyle} />
+            {Thumb}
           </View>
         </View>
       </GestureDetector>
@@ -238,9 +269,7 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
         <View style={trackStyle}>
           <Animated.View style={progressStyle} />
           <Animated.View style={bufferStyle} />
-          <GestureDetector gesture={pan}>
-            <Animated.View hitSlop={ThumbHitSlop} style={thumbStyle} />
-          </GestureDetector>
+          <GestureDetector gesture={pan}>{Thumb}</GestureDetector>
         </View>
       </View>
     );
