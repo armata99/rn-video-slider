@@ -1,8 +1,9 @@
 import React, {useRef, useState} from 'react';
 import {Dimensions, StyleSheet, View, Text} from 'react-native';
 import Video, {OnLoadData, OnProgressData, VideoRef} from 'react-native-video';
-import Slider, {ISlider} from './lib';
+import Slider, {SliderRef, Bubble} from '../../src';
 import ControlButton from './ControlButton';
+import {progressToVideoTime} from './converter';
 
 const styles = StyleSheet.create({
   container: {
@@ -70,7 +71,7 @@ const VideoComponent = () => {
   const [currentTime, setCurrentTime] = useState(0);
 
   const prevPlayerState = useRef<EPlayerStates>(EPlayerStates.PAUSED);
-  const _sliderRef = React.createRef<ISlider>();
+  const _sliderRef = React.createRef<SliderRef>();
   const _playerRef = React.createRef<VideoRef>();
 
   const onLoad = ({duration}: OnLoadData) => {
@@ -95,6 +96,10 @@ const VideoComponent = () => {
     } else {
       setPlayerState(prevPlayerState.current);
     }
+  };
+
+  const _renderBubble = (progress: number) => {
+    return <Bubble text={progressToVideoTime(progress, videoLength.current)} />;
   };
 
   const onProgress = ({currentTime: _ct, playableDuration, seekableDuration}: OnProgressData) => {
@@ -150,6 +155,7 @@ const VideoComponent = () => {
           onSlide={_onSlide}
           onSlideStart={_onSlideStart}
           onSlideFinish={_onSlideFinish}
+          renderBubble={_renderBubble}
           thumbSize={16}
           height={5}
         />

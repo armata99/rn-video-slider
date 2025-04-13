@@ -7,15 +7,14 @@
     "ios": "react-native run-ios  --simulator=\"iPhone 15 Pro\" --terminal terminal",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest",
-    "postinstall": "cp -r ../src/ ./src/lib/"
+    "test": "jest"
   },
   "dependencies": {
-    "react": "18.3.1",
-    "react-native": "0.76.3",
-    "react-native-gesture-handler": "^2.21.2",
-    "react-native-reanimated": "^3.16.3",
-    "react-native-video": "^6.6.4"
+    "react": "workspace:*",
+    "react-native": "workspace:*",
+    "react-native-gesture-handler": "workspace:*",
+    "react-native-reanimated": "workspace:*",
+    "react-native-video": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

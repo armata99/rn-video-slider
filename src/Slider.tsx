@@ -1,4 +1,4 @@
-import React, {ForwardedRef, forwardRef, useImperativeHandle, useRef} from 'react';
+import React, {ForwardedRef, forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState} from 'react';
 import {I18nManager, StyleSheet, View, ViewStyle, Platform} from 'react-native';
 import {GestureDetector, Gesture} from 'react-native-gesture-handler';
 import Animated, {
@@ -10,7 +10,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import {ISliderProps, ISliderRef} from './types';
+import {SliderProps, SliderRef} from './types';
 import {SliderSpringConfig, ThumbHitSlop} from './configs';
 
 const styles = StyleSheet.create({
@@ -30,21 +30,32 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowOffset: {width: 0, height: 0},
     shadowRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bubbleContainer: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
-const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISliderRef | undefined>) => {
+const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undefined>) => {
   const {
     width,
     height = 3,
     thumbSize = 12,
     thumbColor = '#ffffff',
+    thumbStyle: _thumbStyle,
     progressColor = '#ffffff',
     bufferProgressColor = 'rgba(255,255,255, 0.5)',
     trackColor = 'rgba(255,255,255, 0.2)',
     onSlideFinish,
     onSlideStart,
     onSlide,
+    renderBubble,
+    bubbleContainerStyle,
+    bubbleVisibility = 'onTouch',
     isRTL = I18nManager.isRTL,
     rootStyle,
     tapActive = true,
@@ -54,6 +65,9 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISliderRef | und
 
   //calculated values
   const progress = useSharedValue<number>(initialProgress);
+  const [progressBackup, setProgressBackup] = useState<number | undefined>(
+    bubbleVisibility === 'always' ? initialProgress : undefined,
+  ); //this hook is used in rendering bubble to avoid accessing shared value during render
   const bufferProgress = useSharedValue<number>(bufferInitialProgress);
   const offsetOverflow: number = thumbSize / 2;
   const maxDrag: number = width;
@@ -68,9 +82,12 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISliderRef | und
     setProgress: (p: number) => {
       if (!isSliding.current) {
         progress.value = withSpring(p, SliderSpringConfig);
+        if (bubbleVisibility === 'always' && renderBubble) {
+          setProgressBackup(p);
+        }
       }
     },
-    setColdProgress:(p: number) => {
+    setColdProgress: (p: number) => {
       if (!isSliding.current) {
         progress.value = p;
       }
@@ -148,84 +165,131 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISliderRef | und
     height,
   };
 
-  const progressStyle: ViewStyle[] = [
-    {
-      ...styles.progress,
-      backgroundColor: progressColor,
-      height,
-    },
-    progressAnimatedStyle,
-  ];
-
-  const bufferStyle: ViewStyle[] = [
-    {
-      ...styles.buffer,
-      backgroundColor: bufferProgressColor,
-      height,
-    },
-    bufferAnimatedStyle,
-  ];
-
-  const thumbStyle: ViewStyle[] = [
-    {
-      ...styles.thumb,
-      width: thumbSize,
-      height: thumbSize,
-      borderRadius: thumbSize / 2,
-      backgroundColor: thumbColor,
-    },
-    thumbAnimatedStyle,
-  ];
-
-  //a bit of safe calling
-  const _onSlideStart = (progressVal: number) => {
-    isSliding.current = true;
-    onSlideStart?.(progressVal);
-  };
-
-  const _onSlide = (progressVal: number) => onSlide?.(progressVal);
-
-  const _onSlideFinish = (progressVal: number) => {
-    isSliding.current = false;
-    onSlideFinish?.(progressVal);
-  };
-
-  const pan = Gesture.Pan()
-    .onBegin(() => {
-      if (!tapActive) {
-        runOnJS(_onSlideStart)(progress.value);
-        startX.value = progress.value * xRange;
+  const _onSlideStart = useCallback(
+    (progressVal: number) => {
+      isSliding.current = true;
+      if (renderBubble) {
+        setProgressBackup(progressVal);
       }
-    })
-    .onUpdate(event => {
-      const nextValue = startX.value + event.translationX;
-      const clampedValue = Math.max(0, Math.min(nextValue / xRange, 1));
-      progress.value = clampedValue;
-      runOnJS(_onSlide)(clampedValue);
-    })
-    .onFinalize(() => runOnJS(_onSlideFinish)(progress.value));
+      onSlideStart?.(progressVal);
+    },
+    [onSlideStart, renderBubble],
+  );
 
-  if (tapActive) {
-    const tap = Gesture.Tap()
-      .onBegin(() => runOnJS(_onSlideStart)(progress.value))
-      .maxDuration(150)
-      .onTouchesDown(event => {
-        const targetX = event.allTouches[0].x - Math.max(12, offsetOverflow);
-        //we need complement of x on rtl
-        const progressVal = isRTL ? 1 - Math.abs(targetX / xRange) : targetX / xRange;
-        const clampedValue = Math.max(0, Math.min(progressVal, 1));
-        progress.value = clampedValue;
-        startX.value = clampedValue * xRange;
-        runOnJS(_onSlide)(clampedValue);
-      });
+  const _onSlide = useCallback(
+    (progressVal: number) => {
+      if (renderBubble) {
+        setProgressBackup(progressVal);
+      }
+      onSlide?.(progressVal);
+    },
+    [onSlide, renderBubble],
+  );
+
+  const _onSlideFinish = useCallback(
+    (progressVal: number) => {
+      isSliding.current = false;
+      if (bubbleVisibility === 'onTouch' && renderBubble) {
+        setProgressBackup(undefined);
+      }
+      onSlideFinish?.(progressVal);
+    },
+    [bubbleVisibility, onSlideFinish, renderBubble],
+  );
+
+  const panGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .onBegin(() => {
+          if (!tapActive) {
+            runOnJS(_onSlideStart)(progress.value);
+            startX.value = progress.value * xRange;
+          }
+        })
+        .onUpdate(event => {
+          const nextValue = startX.value + event.translationX;
+          const clampedValue = Math.max(0, Math.min(nextValue / xRange, 1));
+          progress.value = clampedValue;
+          runOnJS(_onSlide)(clampedValue);
+        })
+        .onFinalize(() => runOnJS(_onSlideFinish)(progress.value)),
+    [_onSlide, _onSlideFinish, _onSlideStart, progress, startX, tapActive, xRange],
+  );
+
+  const AnimatedViews = useMemo(() => {
+    const progressStyle: ViewStyle[] = [
+      {
+        ...styles.progress,
+        backgroundColor: progressColor,
+        height,
+      },
+      progressAnimatedStyle,
+    ];
+
+    const bufferStyle: ViewStyle[] = [
+      {
+        ...styles.buffer,
+        backgroundColor: bufferProgressColor,
+        height,
+      },
+      bufferAnimatedStyle,
+    ];
 
     return (
-      <GestureDetector gesture={Gesture.Simultaneous(tap, pan)}>
+      <>
+        <Animated.View style={progressStyle} />
+        <Animated.View style={bufferStyle} />
+      </>
+    );
+  }, [bufferAnimatedStyle, bufferProgressColor, height, progressAnimatedStyle, progressColor]);
+
+  const ThumbView = useMemo(() => {
+    const thumbStyle: (ViewStyle | undefined)[] = [
+      {
+        ...styles.thumb,
+        width: thumbSize,
+        height: thumbSize,
+        borderRadius: thumbSize / 2,
+        backgroundColor: thumbColor,
+      },
+      _thumbStyle,
+      thumbAnimatedStyle,
+    ];
+    return (
+      <Animated.View hitSlop={ThumbHitSlop} style={thumbStyle}>
+        <View style={[styles.bubbleContainer, {bottom: thumbSize + 15}, bubbleContainerStyle]}>
+          {progressBackup !== undefined && renderBubble?.(progressBackup)}
+        </View>
+      </Animated.View>
+    );
+  }, [_thumbStyle, bubbleContainerStyle, progressBackup, renderBubble, thumbAnimatedStyle, thumbColor, thumbSize]);
+
+  const tapGesture = useMemo(
+    () =>
+      tapActive
+        ? Gesture.Tap()
+            .onBegin(() => runOnJS(_onSlideStart)(progress.value))
+            .maxDuration(150)
+            .onTouchesDown(event => {
+              const targetX = event.allTouches[0].x - Math.max(12, offsetOverflow);
+              //we need complement of x on rtl
+              const progressVal = isRTL ? 1 - Math.abs(targetX / xRange) : targetX / xRange;
+              const clampedValue = Math.max(0, Math.min(progressVal, 1));
+              progress.value = clampedValue;
+              startX.value = clampedValue * xRange;
+              runOnJS(_onSlide)(clampedValue);
+            })
+        : undefined,
+    [_onSlide, _onSlideStart, isRTL, offsetOverflow, progress, startX, tapActive, xRange],
+  );
+
+  if (tapActive && tapGesture) {
+    return (
+      <GestureDetector gesture={Gesture.Simultaneous(tapGesture, panGesture)}>
         <View style={[styles.root, rootStyle]}>
           <View style={trackStyle}>
-            <Animated.View style={progressStyle} />
-            <Animated.View style={bufferStyle} />
-            <Animated.View hitSlop={ThumbHitSlop} style={thumbStyle} />
+            {AnimatedViews}
+            {ThumbView}
           </View>
         </View>
       </GestureDetector>
@@ -234,11 +298,8 @@ const SliderComponent = (props: ISliderProps, ref: ForwardedRef<ISliderRef | und
     return (
       <View style={[styles.root, rootStyle]}>
         <View style={trackStyle}>
-          <Animated.View style={progressStyle} />
-          <Animated.View style={bufferStyle} />
-          <GestureDetector gesture={pan}>
-            <Animated.View hitSlop={ThumbHitSlop} style={thumbStyle} />
-          </GestureDetector>
+          {AnimatedViews}
+          <GestureDetector gesture={panGesture}>{ThumbView}</GestureDetector>
         </View>
       </View>
     );
