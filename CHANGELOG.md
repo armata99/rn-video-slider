@@ -1,4 +1,9 @@
 
+## [v3.6.1] - 2025-05-09
+### :bug: Bug Fixes
+- [`f354f5f`](https://github.com/armata99/rn-video-slider/commit/f354f5fc01d873213f3514ae2450d045624b7869) - quick fix to prevent duplicate react due to it being listed in dependencies *(PR [#4](https://github.com/armata99/rn-video-slider/pull/4) by [@armata99](https://github.com/armata99))*
+
+
 ## [v0.6.0] - 2025-04-13
 ### :sparkles: New Features
 - [`2826846`](https://github.com/armata99/rn-video-slider/commit/2826846ce325e974b0ece92e8b25ef06e75a74dc) - style override for thumb view *(commit by [@armata99](https://github.com/armata99))*
@@ -66,3 +71,4 @@
 [v0.5.0]: https://github.com/armata99/rn-video-slider/compare/v0.4.1...v0.5.0
 [v0.5.1]: https://github.com/armata99/rn-video-slider/compare/v0.5.0...v0.5.1
 [v0.6.0]: https://github.com/armata99/rn-video-slider/compare/v0.5.1...v0.6.0
+[v3.6.1]: https://github.com/armata99/rn-video-slider/compare/v0.6.0...v3.6.1
