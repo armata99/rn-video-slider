@@ -32,15 +32,6 @@ npm i rn-video-slider
 ```sh
 yarn add rn-video-slider
 ```
-### 🚨Important Note
-Since version 6, I restructuted the project to be able to develop it easier using the TestApp. Therefore, some of the
-TestApp dependencies are listed at root project and they are going to cause errors. To prevent this, simply add below
-line to `postinstall` section of `scripts` at your project's `package.json`
-
-```sh
-rm -rf node_modules/rn-video-slider/node_modules/
-```
-
 That will be it.
 
 ## Usage
