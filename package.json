@@ -7,10 +7,10 @@
     "example": "testapp"
   },
   "scripts": {
+    "testapp": "yarn workspace rn-video-slider-testapp",
     "test": "echo \"Error: no test specified\" && exit 1",
     "ts-check": "tsc -p tsconfig.json",
-    "eslint-check": "eslint --ext .js,.jsx,.ts,.tsx .",
-    "postinstall": "rm -rf ./node_modules"
+    "eslint-check": "eslint --ext .js,.jsx,.ts,.tsx ."
   },
   "repository": {
     "type": "git",
@@ -30,20 +30,14 @@
   "author": "armata99",
   "license": "MIT",
   "peerDependencies": {
+    "react": "*",
     "react-native": "*",
-    "react-native-gesture-handler": "^2.x.x",
-    "react-native-reanimated": "^3.x.x"
+    "react-native-gesture-handler": "2.x.x",
+    "react-native-reanimated": "3.x.x"
   },
   "workspaces": [
-    "testapp/*"
+    "testapp"
   ],
-  "dependencies": {
-    "react": "18.3.1",
-    "react-native": "0.76.3",
-    "react-native-gesture-handler": "^2.21.2",
-    "react-native-reanimated": "^3.16.3",
-    "react-native-video": "^6.6.4"
-  },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
