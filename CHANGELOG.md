@@ -1,4 +1,9 @@
 
+## [v0.6.2] - 2025-07-31
+### :bug: Bug Fixes
+- [`a72c6ec`](https://github.com/armata99/rn-video-slider/commit/a72c6ec90dcd3dcc10a07ba35271f883d441dc1c) - project and dependency conflicts that would cause runtime errors *(commit by [@armata99](https://github.com/armata99))*
+
+
 ## [v3.6.1] - 2025-05-09
 ### :bug: Bug Fixes
 - [`f354f5f`](https://github.com/armata99/rn-video-slider/commit/f354f5fc01d873213f3514ae2450d045624b7869) - quick fix to prevent duplicate react due to it being listed in dependencies *(PR [#4](https://github.com/armata99/rn-video-slider/pull/4) by [@armata99](https://github.com/armata99))*
@@ -72,3 +77,4 @@
 [v0.5.1]: https://github.com/armata99/rn-video-slider/compare/v0.5.0...v0.5.1
 [v0.6.0]: https://github.com/armata99/rn-video-slider/compare/v0.5.1...v0.6.0
 [v3.6.1]: https://github.com/armata99/rn-video-slider/compare/v0.6.0...v3.6.1
+[v0.6.2]: https://github.com/armata99/rn-video-slider/compare/v3.6.1...v0.6.2
