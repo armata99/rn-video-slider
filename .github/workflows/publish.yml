@@ -11,7 +11,7 @@ jobs:
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Update CHANGELOG
         id: changelog
@@ -20,17 +20,18 @@ jobs:
           token: ${{ github.token }}
           tag: ${{ github.ref_name }}
 
+      # The release notes are passed through an environment variable and a file
+      # rather than interpolated into the script, so backticks and quotes in the
+      # changelog cannot break or inject into the shell command.
       - name: Create Release
-        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }} Release
-          body: |
-            ${{ steps.changelog.outputs.changes }}
-          draft: false
-          prerelease: false
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_NOTES: ${{ steps.changelog.outputs.changes }}
+        run: |
+          printf '%s' "$RELEASE_NOTES" > "$RUNNER_TEMP/release-notes.md"
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME Release" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"
 
       - name: Commit CHANGELOG.md
         uses: stefanzweifel/git-auto-commit-action@v5.0.1
@@ -44,13 +45,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: 14
+          node-version: 20
           registry-url: https://registry.npmjs.org
+
+      # Guards against ever republishing the test app. The package should only
+      # ever contain src/, README, LICENSE, CHANGELOG and package.json.
+      - name: Verify package contents
+        run: |
+          npm pack --dry-run
+          if npm pack --dry-run --json | grep -q '"path": *"testapp/'; then
+            echo "::error::testapp files leaked into the published package"
+            exit 1
+          fi
 
       - name: Publish to npm
         run: npm publish --access public
