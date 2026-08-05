@@ -62,9 +62,17 @@ const ControlSet = () => {
   )
 }
 ```
-**Note:** You can see the Component in action by cloning this
-repo and building its test app. Just head over to `testapp`
-directory, install the dependencies and run it on Android or IOS.
+**Note:** You can see the Component in action by cloning this repo and building
+its test app. This repo is a Yarn workspace, so install from the **repository
+root** — not from inside `testapp`:
+
+```sh
+yarn install          # from the repo root
+yarn testapp android  # or: yarn testapp ios
+```
+
+The test app consumes the library straight from `src/`, so your edits show up on
+a Metro reload with no build or relink step.
 
 ## Slider Properties
 Here is the list of properties that you can set or override.
