@@ -14,7 +14,12 @@ const appModules = path.resolve(__dirname, 'node_modules');
  * copies must stay invisible to the bundler — otherwise the app ends up with two
  * instances of React and Reanimated and fails at runtime.
  */
-const singletons = Object.keys(pak.peerDependencies);
+const singletons = [
+  ...Object.keys(pak.peerDependencies),
+  // Not a declared peer of the library, but Reanimated 4 delegates its worklet
+  // runtime to it, so a duplicate copy breaks in exactly the same way.
+  'react-native-worklets',
+];
 
 const escapeForRegExp = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 

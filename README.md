@@ -42,7 +42,9 @@ import Slider, {SliderRef} from "rn-video-slider";
 
 const ControlSet = () => {
 
-  const sliderRef = React.createRef<SliderRef>();
+  //use useRef, not React.createRef: createRef allocates a fresh ref on every
+  //render, so callbacks captured by an earlier render see a null `current`.
+  const sliderRef = React.useRef<SliderRef>(null);
   //call below function in video progress callback
   //sliderRef.current?.setProgress(0.5);
 
@@ -137,9 +139,9 @@ const Example = () => {
   const sliderWdith = Dimensions.get('window').width * 0.8;
 
   //2. make a rendering function for it.
-  // head over to `testapp/src/conveter.ts` to see the `progressToVideoTime` function
+  // head over to `testapp/src/formatTime.ts` to see the `progressToVideoTime` function
   const _renderBubble = (progress: number) => {
-    return <Bubble text={progressToVideoTime(progress, videoLength.current)} />;
+    return <Bubble text={progressToVideoTime(progress, videoLength)} />;
   };
 
   //3. use it
@@ -179,8 +181,12 @@ If you have any idea to improve or fix something, open an issue and state
 it in details. You will always be welcomed.
 
 ## Compatability
-- `react-native-reanimated`: `2.x`, `3.x`
-- `react-native-gesture-handler`: `2.x`
+- `react-native-reanimated`: `2.x`, `3.x`, `4.x`
+- `react-native-gesture-handler`: `2.x`, `3.x`
+
+The bundled test app tracks the latest React Native release (currently `0.85.x`
+with React `19.x`, Reanimated `4.x` and Gesture Handler `3.x`), so it doubles as
+a reference for what a modern integration looks like.
 
 ## Acknowledgement
 The idea behind this is from `react-native-reanimated-slider`.

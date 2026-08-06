@@ -1,6 +1,12 @@
 pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
 plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+// The default autolink command is `npx @react-native-community/cli config`, which
+// goes through node_modules/.bin/rnc-cli. Yarn 3 does not set the executable bit on
+// that package's bin script, so the shim fails with exit 126. Invoking the script
+// through node directly sidesteps the permission bit entirely.
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex ->
+    ex.autolinkLibrariesFromCommand(["node", "./node_modules/@react-native-community/cli/build/bin.js", "config"])
+}
 rootProject.name = 'testapp'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')

@@ -1,30 +1,54 @@
 import React from 'react';
-import {TouchableOpacity, Image, StyleSheet} from 'react-native';
+import {Image, ImageSourcePropType, Pressable, StyleSheet, ViewStyle} from 'react-native';
+import {colors, radius} from './theme';
+
+const SIZE = 48;
 
 const styles = StyleSheet.create({
   button: {
-    width: 40,
-    height: 40,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    width: SIZE,
+    height: SIZE,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
+  },
+  pressed: {
+    backgroundColor: colors.surfaceActive,
+    borderColor: colors.borderActive,
+  },
+  disabled: {
+    opacity: 0.4,
   },
   icon: {
-    width: 25,
-    height: 25,
+    width: 24,
+    height: 24,
     resizeMode: 'contain',
   },
 });
 
-const ControlButton = (props: any) => {
-  return (
-    <TouchableOpacity
-      style={[styles.button, props.style]}
-      onPress={props.onPress}>
-      <Image style={styles.icon} source={props.iconPath} />
-    </TouchableOpacity>
-  );
+type ControlButtonProps = {
+  iconPath: ImageSourcePropType;
+  onPress: () => void;
+  accessibilityLabel: string;
+  style?: ViewStyle;
+  disabled?: boolean;
 };
 
-export default ControlButton;
+function ControlButton({iconPath, onPress, accessibilityLabel, style, disabled}: ControlButtonProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{disabled: !!disabled}}
+      disabled={disabled}
+      onPress={onPress}
+      style={({pressed}) => [styles.button, style, pressed && styles.pressed, disabled && styles.disabled]}>
+      <Image style={styles.icon} source={iconPath} />
+    </Pressable>
+  );
+}
+
+export default React.memo(ControlButton);

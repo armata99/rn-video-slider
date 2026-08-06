@@ -217,7 +217,9 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
   );
 
   const AnimatedViews = useMemo(() => {
-    const progressStyle: ViewStyle[] = [
+    // Not annotated as ViewStyle[]: the values returned by useAnimatedStyle are
+    // opaque style handles in Reanimated 4, not plain style objects.
+    const progressStyle = [
       {
         ...styles.progress,
         backgroundColor: progressColor,
@@ -226,7 +228,7 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
       progressAnimatedStyle,
     ];
 
-    const bufferStyle: ViewStyle[] = [
+    const bufferStyle = [
       {
         ...styles.buffer,
         backgroundColor: bufferProgressColor,
@@ -244,7 +246,7 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
   }, [bufferAnimatedStyle, bufferProgressColor, height, progressAnimatedStyle, progressColor]);
 
   const ThumbView = useMemo(() => {
-    const thumbStyle: (ViewStyle | undefined)[] = [
+    const thumbStyle = [
       {
         ...styles.thumb,
         width: thumbSize,
