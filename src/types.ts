@@ -2,6 +2,14 @@ import React from 'react';
 import {TextStyle, ViewStyle} from 'react-native';
 
 /**
+ * direction the slider fills and the thumb travels in.
+ * - `auto` follows `I18nManager.isRTL`
+ * - `RTL` fills from the right, regardless of the app's layout direction
+ * - `LTR` fills from the left, regardless of the app's layout direction
+ */
+export type AnimationDirection = 'auto' | 'RTL' | 'LTR';
+
+/**
  * type of slider's reference object
  */
 export interface SliderRef {
@@ -26,6 +34,10 @@ export interface SliderRef {
  * type of slider's props object
  */
 export interface SliderProps {
+  /**
+   * reference object exposing the slider's imperative methods
+   */
+  ref?: React.Ref<SliderRef>;
   /**
    * width of slider track
    */
@@ -60,7 +72,17 @@ export interface SliderProps {
    */
   trackColor?: string;
   /**
+   * direction the slider fills and the thumb travels in. `auto` follows
+   * `I18nManager.isRTL`, while `RTL` and `LTR` pin the direction regardless of
+   * the app's layout direction.
+   * @default 'auto'
+   */
+  animationDir?: AnimationDirection;
+  /**
    * overrides direction of movement. setting to "true" makes the slider animate from right to left.
+   * @deprecated use {@link SliderProps.animationDir} instead. It is still
+   * honoured while `animationDir` is `auto`, and will be removed in a future
+   * major release.
    */
   isRTL?: boolean;
   /**

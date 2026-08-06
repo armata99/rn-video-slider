@@ -1,6 +1,6 @@
 {
   "name": "rn-video-slider",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "description": "A dedicated progress slider for video players in React-native.",
   "main": "src/index.tsx",
   "types": "src/index.tsx",
@@ -37,10 +37,11 @@
   "license": "MIT",
   "packageManager": "yarn@3.6.4",
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*",
-    "react-native-gesture-handler": "2.x.x || 3.x.x",
-    "react-native-reanimated": "3.x.x || 4.x.x"
+    "react": ">=19.0.0",
+    "react-native": ">=0.83.0",
+    "react-native-gesture-handler": ">=3.0.0 <4.0.0",
+    "react-native-reanimated": ">=4.0.0 <5.0.0",
+    "react-native-worklets": ">=0.5.0 <1.0.0"
   },
   "workspaces": [
     "testapp"

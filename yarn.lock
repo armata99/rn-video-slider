@@ -8348,10 +8348,11 @@ __metadata:
     react-test-renderer: 19.2.3
     typescript: ^5.8.3
   peerDependencies:
-    react: "*"
-    react-native: "*"
-    react-native-gesture-handler: 2.x.x || 3.x.x
-    react-native-reanimated: 3.x.x || 4.x.x
+    react: ">=19.0.0"
+    react-native: ">=0.83.0"
+    react-native-gesture-handler: ">=3.0.0 <4.0.0"
+    react-native-reanimated: ">=4.0.0 <5.0.0"
+    react-native-worklets: ">=0.5.0 <1.0.0"
   languageName: unknown
   linkType: soft
 
