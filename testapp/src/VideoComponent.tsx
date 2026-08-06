@@ -140,7 +140,6 @@ const VideoComponent = () => {
 
   const applyProgress = useCallback((progress: number) => {
     const clamped = clamp01(progress);
-    console.log({animate: settingsRef.current.animateProgress})
     if (settingsRef.current.animateProgress) {
       sliderRef.current?.setProgress(clamped);
     } else {
@@ -349,7 +348,7 @@ const VideoComponent = () => {
           width={sliderWidth}
           height={settings.trackHeight}
           thumbSize={settings.thumbSize}
-          isRTL={settings.isRTL}
+          animationDir={settings.animationDir}
           tapActive={settings.tapActive}
           bubbleVisibility={settings.bubbleMode === 'always' ? 'always' : 'onTouch'}
           renderBubble={showBubble ? renderBubble : undefined}

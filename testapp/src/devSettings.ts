@@ -1,3 +1,5 @@
+import type {AnimationDirection} from '../../src';
+
 export type BubbleMode = 'off' | 'onTouch' | 'always';
 
 export type VideoSample = {
@@ -28,8 +30,8 @@ export const VIDEO_SAMPLES: readonly VideoSample[] = [
 export const PLAYBACK_RATES: readonly number[] = [0.25, 0.5, 1, 1.5, 2];
 
 export type DevSettings = {
-  /** Slider `isRTL` prop — overrides the app-level layout direction. */
-  isRTL: boolean;
+  /** Slider `animationDir` prop — pins the fill direction regardless of the app's layout direction. */
+  animationDir: AnimationDirection;
   /** Slider `tapActive` prop. */
   tapActive: boolean;
   bubbleMode: BubbleMode;
@@ -50,7 +52,7 @@ export type DevSettings = {
 };
 
 export const DEFAULT_DEV_SETTINGS: DevSettings = {
-  isRTL: false,
+  animationDir: 'auto',
   tapActive: true,
   bubbleMode: 'onTouch',
   thumbSize: 16,
@@ -82,9 +84,12 @@ const BOUNDS: Record<NumericKey, Bounds> = {
 
 const BUBBLE_MODES: readonly BubbleMode[] = ['off', 'onTouch', 'always'];
 
+const ANIMATION_DIRS: readonly AnimationDirection[] = ['auto', 'LTR', 'RTL'];
+
 export type DevSettingsAction =
   | {type: 'toggle'; key: BooleanKey}
   | {type: 'step'; key: NumericKey; direction: 1 | -1}
+  | {type: 'cycleAnimationDir'}
   | {type: 'cycleBubbleMode'}
   | {type: 'cycleRate'}
   | {type: 'cycleSource'}
@@ -104,6 +109,8 @@ export function devSettingsReducer(state: DevSettings, action: DevSettingsAction
       const next = Math.min(max, Math.max(min, state[action.key] + step * action.direction));
       return next === state[action.key] ? state : {...state, [action.key]: next};
     }
+    case 'cycleAnimationDir':
+      return {...state, animationDir: cycle(ANIMATION_DIRS, state.animationDir)};
     case 'cycleBubbleMode':
       return {...state, bubbleMode: cycle(BUBBLE_MODES, state.bubbleMode)};
     case 'cycleRate':

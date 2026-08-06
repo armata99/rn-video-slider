@@ -219,10 +219,10 @@ function DevPanel({
           <Text style={styles.sectionTitle}>SLIDER PROPS</Text>
           <View style={styles.chipRow}>
             <Chip
-              label="direction"
-              value={settings.isRTL ? 'RTL' : 'LTR'}
-              isActive={settings.isRTL}
-              onPress={() => dispatch({type: 'toggle', key: 'isRTL'})}
+              label="animationDir"
+              value={settings.animationDir}
+              isActive={settings.animationDir !== 'auto'}
+              onPress={() => dispatch({type: 'cycleAnimationDir'})}
             />
             <Chip
               label="tapActive"
@@ -258,7 +258,7 @@ function DevPanel({
             />
           </View>
           <Text style={styles.note}>
-            {`app layout direction is ${I18nManager.isRTL ? 'RTL' : 'LTR'} — the isRTL prop overrides it per Slider, without a reload`}
+            {`app layout direction is ${I18nManager.isRTL ? 'RTL' : 'LTR'} — animationDir pins the Slider's own direction on both platforms, without a reload`}
           </Text>
 
           <Text style={styles.sectionTitle}>PROGRESS DRIVER</Text>
