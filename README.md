@@ -15,9 +15,12 @@ in React-Native. It can also be used in audio players because why not? 😎
 - RTL support
 
 ## Installation
-This module uses `react-native-reanimated` and `react-native-gesture-handler` as 
-peer dependencies. make sure You have installed them correctly. You may also install
-`react-native-video`. Check out these links to proceed their installation process:
+This module uses `react-native-reanimated` and `react-native-gesture-handler` as
+peer dependencies. make sure You have installed them correctly. Reanimated 4 pulls
+in `react-native-worklets` as its own dependency, and this module uses it directly,
+so make sure the worklets Babel plugin is the last entry in your `babel.config.js`.
+You may also install `react-native-video`. Check out these links to proceed their
+installation process:
 - [reanimated installation](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started#installation)
 - [gesture-handler installation](https://docs.swmansion.com/react-native-gesture-handler/docs/fundamentals/installation)
 - [video installation](https://react-native-video.github.io/react-native-video/installation)
@@ -90,17 +93,34 @@ Here is the list of properties that you can set or override.
 |  bufferProgressColor  |        string         |    No    | rgba(255,255,255,0.5) | color of buffer progress indicator                                                                                   |
 |      trackColor       |        string         |    No    | rgba(255,255,255,0.2) | color of underlying view                                                                                             |
 |       rootStyle       |       ViewStyle       |    No    |       undefined       | style addon for root view                                                                                            |
-|         isRTL         |        boolean        |    No    |   I18nManager.isRTL   | overrides direction of movement. setting to "true" makes the slider animate from right to left.                      |
+|     animationDir      | 'auto' \| 'RTL' \| 'LTR' |  No   |        'auto'         | direction the slider fills and the thumb travels in. `auto` follows `I18nManager.isRTL`; `RTL` and `LTR` pin the direction on both platforms. |
+|      ~~isRTL~~        |        boolean        |    No    |       undefined       | **Deprecated** — use `animationDir`. Still honoured while `animationDir` is `auto`.                                   |
 |       tapActive       |        boolean        |    No    |         true          | activates tap gesture. when set to "true", onSlide function fires on receiving single taps.                          |
 |    initialProgress    |        number         |    No    |           0           | sets the initial progress value.                                                                                     |
 | bufferInitialProgress |        number         |    No    |           0           | sets the initial buffer progress value.                                                                              |
-| bubbleContainerStyle  |       ViewStyle       |    No    |           0           | style object that overrides default style of bubble container view which is absolutely positioned inside thumb view. |
-|   bubbleVisibility    | 'always' \| 'onTouch' |    No    |          No           | determines when bubble should be displayed                                                                           | determines when bubble should show up |
+| bubbleContainerStyle  |       ViewStyle       |    No    |       undefined       | style object that overrides default style of bubble container view which is absolutely positioned inside thumb view. |
+|   bubbleVisibility    | 'always' \| 'onTouch' |    No    |       'onTouch'       | determines when bubble should be displayed                                                                           |
 
 **Note:** Root view has a default padding equal to 10.
 Override it in root style if you need to.
 
 **Note2:** You can disable thumb shadow by passing appropriate thumbStyle. (`elevation: 0, shadowOpacity: 0`)
+
+## Layout Direction
+`animationDir` decides which end the slider fills from, and it is the same code
+path on iOS and Android. Nothing about the slider's geometry reads
+`I18nManager.isRTL` unless you ask for it with `animationDir="auto"`, so an
+`RTL` slider looks and behaves identically in an LTR app and vice versa:
+
+```typescript jsx
+// always fills from the right, whatever the app's locale says
+<Slider width={sliderWidth} animationDir="RTL" onSlide={_onSlide} />
+```
+
+Internally the track's contents are laid out from its centre and moved into
+place with transforms, so the platform's layout direction never gets a chance to
+mirror them. That also means the progress and buffer bars are scaled rather than
+resized, keeping every frame of a scrub off the layout engine.
 
 ## Event properties
 Here is the list of events that slider fires.
@@ -162,7 +182,27 @@ const Example = () => {
 |   `text`    |  `string`   |   Yes    |  `undefined`  | Text to display at center of bubble (Usually it's video time for corresponding to the current progress.) |
 | `textStyle` | `TextStyle` |    No    |  `undefined`  | Custom style object for the bubble's text element                                                        |
 
+## Upgrading to 0.7.0
+`0.7.0` moves the module onto the Reanimated 4 and Gesture Handler 3 APIs. Those
+libraries are New-Architecture-only, so this release is too.
+
+- Peer dependencies narrowed to `react-native-reanimated` `4.x`,
+  `react-native-gesture-handler` `3.x`, `react-native-worklets` `>=0.5`,
+  `react-native` `>=0.83` and `react` `>=19`. Reanimated 3 and Gesture Handler 2
+  are no longer supported — stay on `0.6.x` if you need them.
+- `isRTL` is deprecated in favour of `animationDir`. It still works while
+  `animationDir` is `auto`, and logs a one-time warning in dev builds.
+- Android no longer mirrors the track with a `rotateY` transform, so an
+  `animationDir` of `RTL` or `LTR` is now honoured there exactly as it always
+  was on iOS.
+- Tap-to-seek now reads the real position of the track instead of assuming the
+  default root padding, so taps land where you put them even with a custom
+  `rootStyle`.
+- No changes to the props, events or ref methods beyond `animationDir`.
+
 ## TODO list
+- [x] ~~move to the Reanimated 4 and Gesture Handler 3 APIs~~
+- [x] ~~make the RTL animation work the same way on Android as on iOS~~
 - [x] ~~add hovering bubble feature~~
 - [x] ~~add in-code docs~~
 - [x] ~~ensure fabric support~~
@@ -181,8 +221,13 @@ If you have any idea to improve or fix something, open an issue and state
 it in details. You will always be welcomed.
 
 ## Compatability
-- `react-native-reanimated`: `2.x`, `3.x`, `4.x`
-- `react-native-gesture-handler`: `2.x`, `3.x`
+- `react-native-reanimated`: `4.x`
+- `react-native-gesture-handler`: `3.x`
+- `react-native-worklets`: `>=0.5.0`
+- `react-native`: `>=0.83` (New Architecture only)
+- `react`: `>=19`
+
+For Reanimated `2.x`/`3.x` or Gesture Handler `2.x`, use `rn-video-slider@0.6.x`.
 
 The bundled test app tracks the latest React Native release (currently `0.85.x`
 with React `19.x`, Reanimated `4.x` and Gesture Handler `3.x`), so it doubles as
