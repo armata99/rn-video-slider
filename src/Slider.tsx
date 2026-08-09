@@ -1,29 +1,37 @@
-import React, {ForwardedRef, forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState} from 'react';
-import {I18nManager, StyleSheet, View, ViewStyle, Platform} from 'react-native';
-import {GestureDetector, Gesture} from 'react-native-gesture-handler';
-import Animated, {
-  runOnJS,
-  SharedValue,
-  useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
-import {SliderProps, SliderRef} from './types';
-import {SliderSpringConfig, ThumbHitSlop} from './configs';
+import React, {useCallback, useEffect, useImperativeHandle, useMemo, useRef} from 'react';
+import {LayoutChangeEvent, StyleSheet, View, ViewStyle} from 'react-native';
+import {
+  GestureDetector,
+  usePanGesture,
+  type PanGestureActiveEvent,
+  type PanGestureEvent,
+} from 'react-native-gesture-handler';
+import Animated, {clamp, useAnimatedStyle, useSharedValue, withSpring, withTiming} from 'react-native-reanimated';
+import {scheduleOnRN} from 'react-native-worklets';
+import {
+  BufferTimingConfig,
+  DefaultThumbSize,
+  DefaultTrackHeight,
+  MinBarScale,
+  RootPadding,
+  SliderSpringConfig,
+  ThumbHitSlop,
+} from './configs';
+import {useIsReversed} from './direction';
+import SliderBubble from './SliderBubble';
+import {SliderProps} from './types';
 
 const styles = StyleSheet.create({
-  root: {padding: 10},
+  root: {padding: RootPadding},
   track: {
+    // Everything inside the track is laid out centred and then moved into place
+    // by a transform. The centre is the one anchor a right-to-left layout
+    // cannot shift, which is what lets the geometry below be identical on both
+    // platforms and independent of `I18nManager`.
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  progress: {
-    position: 'absolute',
-  },
-  buffer: {
-    position: 'absolute',
-  },
+  bar: {position: 'absolute'},
   thumb: {
     elevation: 5,
     shadowColor: '#000',
@@ -33,20 +41,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bubbleContainer: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 });
 
-const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undefined>) => {
+/**
+ * Places a full width bar so that it reads as being `value` full.
+ *
+ * The bar is never resized — resizing is a layout property, and animating one
+ * drags the layout engine through every frame of a scrub. It is scaled instead,
+ * and because scaling happens around the view's centre, half of the width the
+ * scale took away has to be handed back as a translation to pin the bar to the
+ * edge it grows from.
+ */
+const barStyle = (value: number, width: number, isReversed: boolean): ViewStyle => {
+  'worklet';
+  const scaleX = clamp(value, MinBarScale, 1);
+  const translateX = ((isReversed ? 1 : -1) * (width * (1 - scaleX))) / 2;
+  return {transform: [{translateX}, {scaleX}]};
+};
+
+const Slider = (props: SliderProps) => {
   const {
+    ref,
     width,
-    height = 3,
-    thumbSize = 12,
+    height = DefaultTrackHeight,
+    thumbSize = DefaultThumbSize,
     thumbColor = '#ffffff',
-    thumbStyle: _thumbStyle,
+    thumbStyle,
     progressColor = '#ffffff',
     bufferProgressColor = 'rgba(255,255,255, 0.5)',
     trackColor = 'rgba(255,255,255, 0.2)',
@@ -56,184 +76,176 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
     renderBubble,
     bubbleContainerStyle,
     bubbleVisibility = 'onTouch',
-    isRTL = I18nManager.isRTL,
+    animationDir = 'auto',
+    isRTL,
     rootStyle,
     tapActive = true,
     initialProgress = 0,
     bufferInitialProgress = 0,
   } = props;
 
-  //calculated values
-  const progress = useSharedValue<number>(initialProgress);
-  const [progressBackup, setProgressBackup] = useState<number | undefined>(
-    bubbleVisibility === 'always' ? initialProgress : undefined,
-  ); //this hook is used in rendering bubble to avoid accessing shared value during render
-  const bufferProgress = useSharedValue<number>(bufferInitialProgress);
-  const offsetOverflow: number = thumbSize / 2;
-  const maxDrag: number = width;
-  const minDrag: number = -offsetOverflow;
-  const xRange = isRTL ? -width : width;
-  const startX = useSharedValue<number>(0); //to memorize the start point
-  const shouldRotateTrack: boolean = I18nManager.isRTL !== isRTL && Platform.OS === 'android';
-  const shouldInvertDir: boolean = (isRTL && Platform.OS === 'ios') || (Platform.OS === 'android' && I18nManager.isRTL);
-  const isSliding = useRef<boolean>(false);
+  const isReversed = useIsReversed(animationDir, isRTL);
+  const startingProgress = clamp(initialProgress, 0, 1);
 
-  useImperativeHandle(ref, () => ({
-    setProgress: (p: number) => {
-      if (!isSliding.current) {
-        progress.value = withSpring(p, SliderSpringConfig);
-        if (bubbleVisibility === 'always' && renderBubble) {
-          setProgressBackup(p);
+  const progress = useSharedValue<number>(startingProgress);
+  const bufferProgress = useSharedValue<number>(clamp(bufferInitialProgress, 0, 1));
+  /** Progress at the moment the current gesture began, i.e. the origin a drag is measured from. */
+  const gestureOrigin = useSharedValue<number>(0);
+  /** Offset between the left edge of the view the gesture is attached to and the left edge of the track. */
+  const trackOriginX = useSharedValue<number>(0);
+  const isSliding = useSharedValue<boolean>(false);
+  /**
+   * Mirrors `progress`, but is only written with values a user is meant to read.
+   * `progress` also carries every intermediate frame of the `setProgress`
+   * spring, and driving the bubble off those would mean a React render per
+   * frame for a value that only ever settles on the one already known here.
+   */
+  const bubbleProgress = useSharedValue<number>(startingProgress);
+
+  /**
+   * `setProgress` is expected to be called from a player's progress callback,
+   * which keeps firing while the user scrubs. This is the flag that stops those
+   * updates from fighting the gesture for control of the thumb.
+   */
+  const isSlidingRef = useRef<boolean>(false);
+  /**
+   * Read by the worklets below through the stable emitters. Keeping the props
+   * behind a ref is what lets the gesture config stay memoised even when the
+   * consumer passes inline arrow functions.
+   */
+  const eventHandlers = useRef({onSlide, onSlideStart, onSlideFinish});
+  useEffect(() => {
+    eventHandlers.current = {onSlide, onSlideStart, onSlideFinish};
+  });
+
+  const emitSlideStart = useCallback((value: number) => {
+    isSlidingRef.current = true;
+    eventHandlers.current.onSlideStart?.(value);
+  }, []);
+
+  const emitSlide = useCallback((value: number) => {
+    eventHandlers.current.onSlide?.(value);
+  }, []);
+
+  const emitSlideFinish = useCallback((value: number) => {
+    isSlidingRef.current = false;
+    eventHandlers.current.onSlideFinish?.(value);
+  }, []);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      setProgress: (value: number) => {
+        if (isSlidingRef.current) {
+          return;
         }
-      }
-    },
-    setColdProgress: (p: number) => {
-      if (!isSliding.current) {
-        progress.value = p;
-      }
-    },
-    setBufferProgress: (p: number) => (bufferProgress.value = p),
-  }));
-
-  const thumbOffset = useDerivedValue(() => {
-    const nextValue = progress.value * width - offsetOverflow;
-    if (nextValue >= minDrag && nextValue <= maxDrag - offsetOverflow) {
-      return nextValue;
-    } else {
-      if (nextValue > maxDrag - offsetOverflow) {
-        progress.value = 1;
-        return maxDrag - offsetOverflow;
-      } else {
-        progress.value = 0;
-        return minDrag;
-      }
-    }
-  });
-
-  const progressWidth = useDerivedValue(() => {
-    const nextValue = progress.value * width;
-    if (nextValue >= 0 && nextValue <= width) {
-      return nextValue;
-    } else {
-      if (nextValue > width) {
-        progress.value = 1;
-        return width;
-      } else {
-        progress.value = 0;
-        return 0;
-      }
-    }
-  });
-
-  const bufferWidth: SharedValue<number> = useDerivedValue(() => {
-    const nextValue = bufferProgress.value * width;
-    if (nextValue >= 0 && nextValue <= width) {
-      return nextValue;
-    } else {
-      if (nextValue > width) {
-        bufferProgress.value = 1;
-        return width;
-      } else {
-        bufferProgress.value = 0;
-        return 0;
-      }
-    }
-  });
-
-  const progressAnimatedStyle = useAnimatedStyle((): ViewStyle => {
-    return {width: progressWidth.value};
-  });
-
-  const bufferAnimatedStyle = useAnimatedStyle((): ViewStyle => {
-    return {
-      width: withTiming(bufferWidth.value),
-    };
-  });
-
-  const thumbAnimatedStyle = useAnimatedStyle((): ViewStyle => {
-    return {
-      transform: [{translateX: shouldInvertDir ? -thumbOffset.value : thumbOffset.value}],
-    };
-  });
-
-  const trackStyle: ViewStyle = {
-    ...styles.track,
-    direction: isRTL ? 'rtl' : 'ltr', //android does not support this props. it can be fixed it with below prop
-    ...(shouldRotateTrack && {transform: [{rotateY: '180deg'}]}),
-    backgroundColor: trackColor,
-    width,
-    height,
-  };
-
-  const _onSlideStart = useCallback(
-    (progressVal: number) => {
-      isSliding.current = true;
-      if (renderBubble) {
-        setProgressBackup(progressVal);
-      }
-      onSlideStart?.(progressVal);
-    },
-    [onSlideStart, renderBubble],
-  );
-
-  const _onSlide = useCallback(
-    (progressVal: number) => {
-      if (renderBubble) {
-        setProgressBackup(progressVal);
-      }
-      onSlide?.(progressVal);
-    },
-    [onSlide, renderBubble],
-  );
-
-  const _onSlideFinish = useCallback(
-    (progressVal: number) => {
-      isSliding.current = false;
-      if (bubbleVisibility === 'onTouch' && renderBubble) {
-        setProgressBackup(undefined);
-      }
-      onSlideFinish?.(progressVal);
-    },
-    [bubbleVisibility, onSlideFinish, renderBubble],
-  );
-
-  const panGesture = useMemo(
-    () =>
-      Gesture.Pan()
-        .onBegin(() => {
-          if (!tapActive) {
-            runOnJS(_onSlideStart)(progress.value);
-            startX.value = progress.value * xRange;
-          }
-        })
-        .onUpdate(event => {
-          const nextValue = startX.value + event.translationX;
-          const clampedValue = Math.max(0, Math.min(nextValue / xRange, 1));
-          progress.value = clampedValue;
-          runOnJS(_onSlide)(clampedValue);
-        })
-        .onFinalize(() => runOnJS(_onSlideFinish)(progress.value)),
-    [_onSlide, _onSlideFinish, _onSlideStart, progress, startX, tapActive, xRange],
-  );
-
-  const AnimatedViews = useMemo(() => {
-    const progressStyle: ViewStyle[] = [
-      {
-        ...styles.progress,
-        backgroundColor: progressColor,
-        height,
+        const next = clamp(value, 0, 1);
+        progress.set(withSpring(next, SliderSpringConfig));
+        bubbleProgress.set(next);
       },
-      progressAnimatedStyle,
-    ];
-
-    const bufferStyle: ViewStyle[] = [
-      {
-        ...styles.buffer,
-        backgroundColor: bufferProgressColor,
-        height,
+      setColdProgress: (value: number) => {
+        if (isSlidingRef.current) {
+          return;
+        }
+        const next = clamp(value, 0, 1);
+        progress.set(next);
+        bubbleProgress.set(next);
       },
-      bufferAnimatedStyle,
-    ];
+      setBufferProgress: (value: number) => {
+        bufferProgress.set(withTiming(clamp(value, 0, 1), BufferTimingConfig));
+      },
+    }),
+    [bubbleProgress, bufferProgress, progress],
+  );
+
+  const onTrackLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      trackOriginX.set(event.nativeEvent.layout.x);
+    },
+    [trackOriginX],
+  );
+
+  /**
+   * One pan handler covers both gestures. Gesture Handler 3 reports the touch
+   * position to `onBegin`, which fires the moment a finger lands, so seeking to
+   * a tap no longer needs a second handler racing the pan for it.
+   */
+  const gestureConfig = useMemo(
+    () => ({
+      // Gesture Handler does its own hit testing and ignores the view's
+      // `hitSlop`, so the slop has to be declared here. It only matters without
+      // `tapActive`, where the handler sits on the thumb rather than on the
+      // padded root view.
+      hitSlop: tapActive ? undefined : ThumbHitSlop,
+      onBegin: (event: PanGestureEvent) => {
+        'worklet';
+        isSliding.set(true);
+        if (!tapActive) {
+          gestureOrigin.set(progress.get());
+          scheduleOnRN(emitSlideStart, progress.get());
+          return;
+        }
+        const ratio = (event.x - trackOriginX.get()) / width;
+        const value = clamp(isReversed ? 1 - ratio : ratio, 0, 1);
+        gestureOrigin.set(value);
+        progress.set(value);
+        bubbleProgress.set(value);
+        scheduleOnRN(emitSlideStart, value);
+        scheduleOnRN(emitSlide, value);
+      },
+      onUpdate: (event: PanGestureActiveEvent) => {
+        'worklet';
+        const travelled = (isReversed ? -event.translationX : event.translationX) / width;
+        const value = clamp(gestureOrigin.get() + travelled, 0, 1);
+        progress.set(value);
+        bubbleProgress.set(value);
+        scheduleOnRN(emitSlide, value);
+      },
+      onFinalize: () => {
+        'worklet';
+        isSliding.set(false);
+        scheduleOnRN(emitSlideFinish, progress.get());
+      },
+    }),
+    [
+      bubbleProgress,
+      emitSlide,
+      emitSlideFinish,
+      emitSlideStart,
+      gestureOrigin,
+      isReversed,
+      isSliding,
+      progress,
+      tapActive,
+      trackOriginX,
+      width,
+    ],
+  );
+
+  const panGesture = usePanGesture(gestureConfig);
+
+  const progressAnimatedStyle = useAnimatedStyle(() => barStyle(progress.get(), width, isReversed));
+
+  const bufferAnimatedStyle = useAnimatedStyle(() => barStyle(bufferProgress.get(), width, isReversed));
+
+  const thumbAnimatedStyle = useAnimatedStyle(() => {
+    // The thumb starts centred on the track, so half a track's width of travel
+    // in each direction covers the whole range. Note this never involves the
+    // thumb's own size: whatever `thumbStyle` scales it to, its centre still
+    // lands exactly on the progress it represents.
+    return {transform: [{translateX: (isReversed ? -1 : 1) * (progress.get() - 0.5) * width}]};
+  });
+
+  const trackStyle = useMemo<ViewStyle>(
+    () => ({...styles.track, backgroundColor: trackColor, width, height}),
+    [height, trackColor, width],
+  );
+
+  const bars = useMemo(() => {
+    // Not annotated as ViewStyle[]: the values returned by useAnimatedStyle are
+    // opaque style handles in Reanimated 4, not plain style objects.
+    const progressStyle = [{...styles.bar, backgroundColor: progressColor, width, height}, progressAnimatedStyle];
+    const bufferStyle = [{...styles.bar, backgroundColor: bufferProgressColor, width, height}, bufferAnimatedStyle];
 
     return (
       <>
@@ -241,10 +253,10 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
         <Animated.View style={bufferStyle} />
       </>
     );
-  }, [bufferAnimatedStyle, bufferProgressColor, height, progressAnimatedStyle, progressColor]);
+  }, [bufferAnimatedStyle, bufferProgressColor, height, progressAnimatedStyle, progressColor, width]);
 
-  const ThumbView = useMemo(() => {
-    const thumbStyle: (ViewStyle | undefined)[] = [
+  const thumb = useMemo(() => {
+    const style = [
       {
         ...styles.thumb,
         width: thumbSize,
@@ -252,58 +264,61 @@ const SliderComponent = (props: SliderProps, ref: ForwardedRef<SliderRef | undef
         borderRadius: thumbSize / 2,
         backgroundColor: thumbColor,
       },
-      _thumbStyle,
+      thumbStyle,
       thumbAnimatedStyle,
     ];
+
     return (
-      <Animated.View hitSlop={ThumbHitSlop} style={thumbStyle}>
-        <View style={[styles.bubbleContainer, {bottom: thumbSize + 15}, bubbleContainerStyle]}>
-          {progressBackup !== undefined && renderBubble?.(progressBackup)}
-        </View>
+      <Animated.View style={style}>
+        {renderBubble && (
+          <SliderBubble
+            value={bubbleProgress}
+            isSliding={isSliding}
+            initialValue={startingProgress}
+            visibility={bubbleVisibility}
+            render={renderBubble}
+            containerStyle={bubbleContainerStyle}
+            thumbSize={thumbSize}
+          />
+        )}
       </Animated.View>
     );
-  }, [_thumbStyle, bubbleContainerStyle, progressBackup, renderBubble, thumbAnimatedStyle, thumbColor, thumbSize]);
+  }, [
+    bubbleContainerStyle,
+    bubbleProgress,
+    bubbleVisibility,
+    isSliding,
+    renderBubble,
+    startingProgress,
+    thumbAnimatedStyle,
+    thumbColor,
+    thumbSize,
+    thumbStyle,
+  ]);
 
-  const tapGesture = useMemo(
-    () =>
-      tapActive
-        ? Gesture.Tap()
-            .onBegin(() => runOnJS(_onSlideStart)(progress.value))
-            .maxDuration(150)
-            .onTouchesDown(event => {
-              const targetX = event.allTouches[0].x - Math.max(12, offsetOverflow);
-              //we need complement of x on rtl
-              const progressVal = isRTL ? 1 - Math.abs(targetX / xRange) : targetX / xRange;
-              const clampedValue = Math.max(0, Math.min(progressVal, 1));
-              progress.value = clampedValue;
-              startX.value = clampedValue * xRange;
-              runOnJS(_onSlide)(clampedValue);
-            })
-        : undefined,
-    [_onSlide, _onSlideStart, isRTL, offsetOverflow, progress, startX, tapActive, xRange],
-  );
-
-  if (tapActive && tapGesture) {
+  // With tap-to-seek the whole padded root is touchable, so the detector wraps
+  // it. Without it, only dragging the thumb may move the slider.
+  if (tapActive) {
     return (
-      <GestureDetector gesture={Gesture.Simultaneous(tapGesture, panGesture)}>
+      <GestureDetector gesture={panGesture}>
         <View style={[styles.root, rootStyle]}>
-          <View style={trackStyle}>
-            {AnimatedViews}
-            {ThumbView}
+          <View style={trackStyle} onLayout={onTrackLayout}>
+            {bars}
+            {thumb}
           </View>
         </View>
       </GestureDetector>
     );
-  } else {
-    return (
-      <View style={[styles.root, rootStyle]}>
-        <View style={trackStyle}>
-          {AnimatedViews}
-          <GestureDetector gesture={panGesture}>{ThumbView}</GestureDetector>
-        </View>
-      </View>
-    );
   }
+
+  return (
+    <View style={[styles.root, rootStyle]}>
+      <View style={trackStyle}>
+        {bars}
+        <GestureDetector gesture={panGesture}>{thumb}</GestureDetector>
+      </View>
+    </View>
+  );
 };
 
-export default forwardRef(SliderComponent);
+export default Slider;
