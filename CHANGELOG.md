@@ -1,4 +1,26 @@
 
+## [v0.7.0] - 2026-08-09
+### :boom: BREAKING CHANGES
+- due to [`e7170b6`](https://github.com/armata99/rn-video-slider/commit/e7170b669613cb41716115cbba1c70fbd0dbf82c) - animationDir prop and rewrite on Reanimated 4 / Gesture Handler 3 *(commit by [@armata99](https://github.com/armata99))*:
+
+  peer dependencies narrow to react-native-reanimated 4.x,  
+  react-native-gesture-handler 3.x, react-native-worklets >=0.5.0 (the release  
+  that introduced scheduleOnRN), react-native >=0.83 and react >=19. Both  
+  libraries are New Architecture only, so this release is too. Reanimated 3  
+  and Gesture Handler 2 users should stay on 0.6.x.
+
+
+### :sparkles: New Features
+- [`e7170b6`](https://github.com/armata99/rn-video-slider/commit/e7170b669613cb41716115cbba1c70fbd0dbf82c) - animationDir prop and rewrite on Reanimated 4 / Gesture Handler 3 *(commit by [@armata99](https://github.com/armata99))*
+
+### :bug: Bug Fixes
+- [`e73b380`](https://github.com/armata99/rn-video-slider/commit/e73b3807b0cfd434bbf6d79b47a12ce7e3e85996) - dependency and packaging conflicts when installing the module *(commit by [@armata99](https://github.com/armata99))*
+
+### :wrench: Chores
+- [`b2971a7`](https://github.com/armata99/rn-video-slider/commit/b2971a74b81f1469aac619a0a682b259da72a206) - upgrade test app to React Native 0.85 and rebuild its video component *(commit by [@armata99](https://github.com/armata99))*
+- [`6467772`](https://github.com/armata99/rn-video-slider/commit/646777269091ddf62407657a5aaef003a9951d5c) - drive the test app's Slider with animationDir *(commit by [@armata99](https://github.com/armata99))*
+
+
 ## [v0.6.2] - 2025-07-31
 ### :bug: Bug Fixes
 - [`a72c6ec`](https://github.com/armata99/rn-video-slider/commit/a72c6ec90dcd3dcc10a07ba35271f883d441dc1c) - project and dependency conflicts that would cause runtime errors *(commit by [@armata99](https://github.com/armata99))*
@@ -78,3 +100,4 @@
 [v0.6.0]: https://github.com/armata99/rn-video-slider/compare/v0.5.1...v0.6.0
 [v3.6.1]: https://github.com/armata99/rn-video-slider/compare/v0.6.0...v3.6.1
 [v0.6.2]: https://github.com/armata99/rn-video-slider/compare/v3.6.1...v0.6.2
+[v0.7.0]: https://github.com/armata99/rn-video-slider/compare/v0.6.2...v0.7.0
